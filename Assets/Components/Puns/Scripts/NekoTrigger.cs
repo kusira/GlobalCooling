@@ -2,27 +2,24 @@ using UnityEngine;
 using System.Collections;
 
 /// <summary>
-/// アルミ缶の上にあるみかんのトリガーを管理するスクリプト
-/// TangerinesをJudementTopの上に置いて一定時間経過でダジャレを成立させる
+/// ネコのトリガーを管理するスクリプト
+/// このオブジェクトが-270～90度の角度でGroundタグのオブジェクトに一定時間触れていたらダジャレを成立させる
 /// </summary>
-public class ArumikanTrigger : MonoBehaviour
+public class NekoTrigger : MonoBehaviour
 {
     [Header("Trigger Settings")]
     [Tooltip("ダジャレ成立までの待機時間（秒）")]
-    [SerializeField] private float triggerWaitTime = 1.4f;
+    [SerializeField] private float triggerWaitTime = 1.5f;
+    
+    [Tooltip("元の角度（0度）との差の最小値（度）")]
+    [SerializeField] private float minAngleDifference = 80f;
     
     [Header("References")]
     [Tooltip("PunDisplayGeneratorへの参照")]
     [SerializeField] private PunDisplayGenerator punDisplayGenerator;
     
     [Tooltip("ダジャレのID")]
-    [SerializeField] private string punId = "Arumikan";
-    
-    [Tooltip("Tangerinesオブジェクト（判定対象）")]
-    [SerializeField] private GameObject tangerinesObject;
-    
-    [Tooltip("JudementTopオブジェクト（判定床）")]
-    [SerializeField] private GameObject judgmentTopObject;
+    [SerializeField] private string punId = "Neko";
     
     [Header("Fade Out Settings")]
     [Tooltip("ダジャレ発生後のインターバル（秒）")]
@@ -31,9 +28,7 @@ public class ArumikanTrigger : MonoBehaviour
     [Tooltip("フェードアウト時間（秒）")]
     [SerializeField] private float fadeOutDuration = 0.3f;
     
-    private Collider2D judgmentTopCollider; // JudementTopのCollider2D
-    private Rigidbody2D tangerinesRigidbody; // TangerinesのRigidbody2D
-    private bool isTangerinesInTrigger = false; // Tangerinesがトリガー内にいるか
+    private bool isTouchingGround = false; // Groundタグのオブジェクトに触れているか
     private float timer = 0f; // タイマー
     private bool hasTriggered = false; // 既にダジャレが発生したか
     private SpriteRenderer[] spriteRenderers; // このオブジェクトとその子オブジェクトのSpriteRenderer
@@ -41,43 +36,31 @@ public class ArumikanTrigger : MonoBehaviour
 
     private void Awake()
     {
-        // JudementTopのCollider2Dを取得
-        if (judgmentTopObject != null)
-        {
-            // 別オブジェクトから取得
-            judgmentTopCollider = judgmentTopObject.GetComponent<Collider2D>();
-            if (judgmentTopCollider != null)
-            {
-                // JudementTopにヘルパースクリプトを追加（既にある場合は追加しない）
-                JudgmentTopTriggerHelper helper = judgmentTopObject.GetComponent<JudgmentTopTriggerHelper>();
-                if (helper == null)
-                {
-                    helper = judgmentTopObject.AddComponent<JudgmentTopTriggerHelper>();
-                }
-                helper.SetArumikanTrigger(this);
-            }
-        }
-        
-        // TangerinesのRigidbody2Dを取得（参照のみ、使用しない）
-        if (tangerinesObject != null)
-        {
-            tangerinesRigidbody = tangerinesObject.GetComponent<Rigidbody2D>();
-        }
-        
         // このオブジェクトとその子オブジェクトのSpriteRendererを取得
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        
+        Debug.Log($"NekoTrigger: 初期化完了 - triggerWaitTime: {triggerWaitTime}秒, minAngleDifference: {minAngleDifference}度, punId: {punId}");
     }
 
     private void Update()
     {
-        // Tangerinesがトリガー内にいる場合、タイマーを進める
-        if (isTangerinesInTrigger && !hasTriggered)
+        // Groundに触れていて、角度が範囲内で、まだトリガーしていない場合
+        bool angleInRange = IsAngleInRange();
+        
+        if (isTouchingGround && !hasTriggered && angleInRange)
         {
             timer += Time.deltaTime;
+            
+            // 定期的にタイマーの進捗を表示（0.5秒ごと）
+            if (Mathf.FloorToInt(timer * 2f) != Mathf.FloorToInt((timer - Time.deltaTime) * 2f))
+            {
+                Debug.Log($"NekoTrigger: タイマー進行中 - {timer:F2}秒 / {triggerWaitTime:F2}秒");
+            }
             
             // 待機時間を超えたらダジャレを発生
             if (timer >= triggerWaitTime)
             {
+                Debug.Log($"NekoTrigger: 待機時間達成！ダジャレを発生させます。");
                 TriggerPun();
                 hasTriggered = true;
             }
@@ -87,47 +70,85 @@ public class ArumikanTrigger : MonoBehaviour
             // 条件を満たしていない場合はタイマーをリセット
             if (timer > 0f)
             {
+                if (!isTouchingGround)
+                {
+                    Debug.Log($"NekoTrigger: Groundに触れていないため、タイマーをリセット");
+                }
+                else if (!angleInRange)
+                {
+                    Debug.Log($"NekoTrigger: 角度が範囲外のため、タイマーをリセット");
+                }
                 timer = 0f;
             }
         }
     }
 
     /// <summary>
-    /// Tangerinesがトリガーに入ったとき（JudgmentTopTriggerHelperから呼ばれる）
+    /// 元の角度（0度）との差が80度以上かチェック
     /// </summary>
-    public void OnTangerinesEnter(Collider2D other)
+    private bool IsAngleInRange()
     {
-        if (tangerinesObject == null)
+        // Z軸の回転角度を取得（0～360度）
+        float currentAngle = transform.rotation.eulerAngles.z;
+        
+        // 0度との差を計算（0～180度の範囲で）
+        float angleDifference = Mathf.Abs(currentAngle - 0f);
+        
+        // 180度を超える場合は、反対側の角度を計算
+        if (angleDifference > 180f)
         {
-            return;
+            angleDifference = 360f - angleDifference;
         }
         
-        if (other.gameObject == tangerinesObject)
+        // 定期的に角度情報を表示（毎フレームは多すぎるので、条件が変わったときのみ）
+        bool inRange = angleDifference >= minAngleDifference;
+        
+        // 差が80度以上かチェック
+        return inRange;
+    }
+
+    /// <summary>
+    /// トリガーに入ったとき
+    /// </summary>
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Ground"))
         {
-            isTangerinesInTrigger = true;
+            Debug.Log($"NekoTrigger: Groundタグのオブジェクトに接触開始 - {other.gameObject.name}");
+            isTouchingGround = true;
             timer = 0f; // タイマーをリセット
+            
+            // 現在の角度を表示
+            float currentAngle = transform.rotation.eulerAngles.z;
+            float angleDifference = Mathf.Abs(currentAngle - 0f);
+            if (angleDifference > 180f)
+            {
+                angleDifference = 360f - angleDifference;
+            }
+            Debug.Log($"NekoTrigger: 現在の角度: {currentAngle:F2}度, 0度との差: {angleDifference:F2}度, 範囲内: {angleDifference >= minAngleDifference}");
         }
     }
 
     /// <summary>
-    /// Tangerinesがトリガー内にいる間（JudgmentTopTriggerHelperから呼ばれる）
+    /// トリガー内にいる間
     /// </summary>
-    public void OnTangerinesStay(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject == tangerinesObject)
+        if (other.CompareTag("Ground"))
         {
-            isTangerinesInTrigger = true;
+            isTouchingGround = true;
         }
     }
 
     /// <summary>
-    /// Tangerinesがトリガーから出たとき（JudgmentTopTriggerHelperから呼ばれる）
+    /// トリガーから出たとき
     /// </summary>
-    public void OnTangerinesExit(Collider2D other)
+    private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject == tangerinesObject)
+        if (other.CompareTag("Ground"))
         {
-            isTangerinesInTrigger = false;
+            Debug.Log($"NekoTrigger: Groundタグのオブジェクトから離脱 - {other.gameObject.name}, タイマー: {timer:F2}秒");
+            isTouchingGround = false;
             timer = 0f; // タイマーをリセット
             hasTriggered = false; // リセットして再度トリガー可能にする
         }
@@ -140,9 +161,12 @@ public class ArumikanTrigger : MonoBehaviour
     {
         if (punDisplayGenerator == null)
         {
+            Debug.LogWarning($"NekoTrigger: PunDisplayGeneratorが設定されていません。GameObject: {gameObject.name}");
             return;
         }
 
+        Debug.Log($"NekoTrigger: ダジャレ発生！ID: \"{punId}\"");
+        
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId);
         
@@ -163,11 +187,17 @@ public class ArumikanTrigger : MonoBehaviour
         
         isFadingOut = true;
         
+        Debug.Log($"NekoTrigger: インターバル待機開始 ({destroyInterval}秒)");
+        
         // インターバル待機
         yield return new WaitForSeconds(destroyInterval);
         
+        Debug.Log($"NekoTrigger: インターバル終了。フェードアウトを開始します。");
+        
         // フェードアウト
         yield return StartCoroutine(FadeOut());
+        
+        Debug.Log($"NekoTrigger: フェードアウト完了。オブジェクトをDestroyします。");
         
         // Destroy
         Destroy(gameObject);

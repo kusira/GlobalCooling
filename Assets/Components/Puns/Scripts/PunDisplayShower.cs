@@ -41,6 +41,9 @@ public class PunDisplayShower : MonoBehaviour
     [Header("Fade Out Settings")]
     [Tooltip("フェードアウト時間（秒）")]
     [SerializeField] private float fadeOutDuration = 0.5f;
+    
+    [Tooltip("スケールアニメーション終了後のスケール縮小の最終倍率（デフォルト0.95）")]
+    [SerializeField] private float finalScale = 0.95f;
 
     /// <summary>
     /// テキストを設定（外部から呼び出し可能）
@@ -87,6 +90,15 @@ public class PunDisplayShower : MonoBehaviour
     public void SetMainCameraTransform(Transform cameraTransform)
     {
         mainCameraTransform = cameraTransform;
+    }
+    
+    /// <summary>
+    /// テキストオブジェクトを取得（外部から呼び出し可能）
+    /// </summary>
+    /// <returns>テキストオブジェクト</returns>
+    public GameObject GetTextObject()
+    {
+        return punText;
     }
 
     private void Start()
@@ -181,7 +193,18 @@ public class PunDisplayShower : MonoBehaviour
         }
 
         // 表示時間を待つ
-        displaySequence.AppendInterval(displayDuration - textScaleDuration - fadeOutDuration);
+        float waitDuration = displayDuration - textScaleDuration - fadeOutDuration;
+        displaySequence.AppendInterval(waitDuration);
+        
+        // スケールアニメーション終了後から消滅までの間、スケールを線形で縮小
+        if (punText != null && waitDuration + fadeOutDuration > 0f)
+        {
+            float scaleShrinkDuration = waitDuration + fadeOutDuration; // 待機時間 + フェードアウト時間
+            displaySequence.Join(
+                punText.transform.DOScale(Vector3.one * finalScale, scaleShrinkDuration)
+                    .SetEase(Ease.Linear)
+            );
+        }
 
         // フェードアウト処理（任意秒でテキストの透明度を0にする、集中線のRadiusを1.4にアニメーション）
         Tween textFadeTween = null;

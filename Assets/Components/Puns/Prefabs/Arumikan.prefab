@@ -552,7 +552,7 @@ MonoBehaviour:
   punDisplayPrefab: {fileID: 3663420597882631773, guid: bfd9a05d1b993b74e8a2652046107928, type: 3}
   punsDatabase: {fileID: 11400000, guid: 6a1b63335980f404692fbbe560acb4ed, type: 2}
   spawnOffset: {x: 0, y: 0, z: 0}
-  displayDelay: 0.3
+  displayDelay: 0
 --- !u!114 &5696622335396878814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -570,3 +570,5 @@ MonoBehaviour:
   punId: Arumikan
   tangerinesObject: {fileID: 79023149529912020}
   judgmentTopObject: {fileID: 5903267693489071637}
+  destroyInterval: 1
+  fadeOutDuration: 0.3

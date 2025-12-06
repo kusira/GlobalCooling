@@ -114,6 +114,15 @@ public class PunDisplayGenerator : MonoBehaviour
             // フォントサイズを設定（デフォルト30）
             punDisplayShower.SetFontSize(punData.fontSize);
             
+            // テキストオブジェクトのZ軸回転を-10度から10度までランダムに設定
+            GameObject textObject = punDisplayShower.GetTextObject();
+            if (textObject != null)
+            {
+                float randomRotationZ = Random.Range(-10f, 10f);
+                Vector3 currentRotation = textObject.transform.localEulerAngles;
+                textObject.transform.localEulerAngles = new Vector3(currentRotation.x, currentRotation.y, randomRotationZ);
+            }
+            
             // ConcentrateLineのMaterialのDelayを0~10でランダムに設定
             SetupConcentrateLineMaterial(punDisplayShower);
         }
