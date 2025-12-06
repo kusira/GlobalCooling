@@ -9,7 +9,7 @@ public class DragAndDropManager : MonoBehaviour
 {
     [Header("Drag Settings")]
     [Tooltip("ドラッグ中の最大移動速度（0以下で無制限）")]
-    [SerializeField] private float maxDragSpeed = 20f;
+    [SerializeField] private float maxDragSpeed = 30f;
     
     [Header("Throw Settings")]
     [Tooltip("離したときに加える力の係数")]

@@ -23,6 +23,8 @@ public class PunDisplayGenerator : MonoBehaviour
     [SerializeField] private float displayDelay = 0.3f;
     
     private Transform punsParentTransform; // 「Puns」という名前のGameObjectのTransform
+    private bool isDisplaying = false; // 現在PunDisplayが表示中かどうか
+    private GameObject currentPunDisplay; // 現在表示中のPunDisplay
 
     private void Awake()
     {
@@ -54,6 +56,12 @@ public class PunDisplayGenerator : MonoBehaviour
     /// <param name="punId">ダジャレのID</param>
     public void GeneratePun(string punId)
     {
+        // 既に表示中の場合は生成しない
+        if (isDisplaying)
+        {
+            return;
+        }
+        
         // 遅延してから実際に生成する
         StartCoroutine(GeneratePunDelayed(punId));
     }
@@ -101,8 +109,18 @@ public class PunDisplayGenerator : MonoBehaviour
             FindPunsParent();
         }
 
+        // 既に表示中の場合は生成しない（コルーチン中に他のトリガーが発動した場合の対策）
+        if (isDisplaying)
+        {
+            yield break;
+        }
+        
+        // 表示中フラグを立てる
+        isDisplaying = true;
+        
         // Prefabを生成（位置は(0,0,0)に固定、「Puns」の子として）
         GameObject instance = Instantiate(punDisplayPrefab, Vector3.zero, Quaternion.identity, punsParentTransform);
+        currentPunDisplay = instance;
         
         // PunDisplayShowerコンポーネントを取得してテキストを設定
         PunDisplayShower punDisplayShower = instance.GetComponent<PunDisplayShower>();
@@ -125,11 +143,26 @@ public class PunDisplayGenerator : MonoBehaviour
             
             // ConcentrateLineのMaterialのDelayを0~10でランダムに設定
             SetupConcentrateLineMaterial(punDisplayShower);
+            
+            // PunDisplayShowerが破棄されたときに通知を受け取る
+            punDisplayShower.SetPunDisplayGenerator(this);
         }
         else
         {
             Debug.LogWarning("PunDisplayGenerator: PunDisplayShowerコンポーネントが見つかりません。");
+            // PunDisplayShowerが見つからない場合はフラグをリセット
+            isDisplaying = false;
+            currentPunDisplay = null;
         }
+    }
+    
+    /// <summary>
+    /// PunDisplayが破棄されたときに呼び出される（PunDisplayShowerから呼び出される）
+    /// </summary>
+    public void OnPunDisplayDestroyed()
+    {
+        isDisplaying = false;
+        currentPunDisplay = null;
     }
 
     /// <summary>

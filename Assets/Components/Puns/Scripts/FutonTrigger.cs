@@ -11,6 +11,9 @@ public class FutonTrigger : MonoBehaviour
     [Tooltip("ダジャレ成立に必要な速度の閾値")]
     [SerializeField] private float triggerSpeedThreshold = 50f;
     
+    [Tooltip("Y軸の最大速度（0以下で無制限）")]
+    [SerializeField] private float maxYVelocity = 20f;
+    
     [Header("References")]
     [Tooltip("PunDisplayGeneratorへの参照")]
     [SerializeField] private PunDisplayGenerator punDisplayGenerator;
@@ -39,6 +42,22 @@ public class FutonTrigger : MonoBehaviour
         
         // このオブジェクトと子オブジェクトのSpriteRendererを取得
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+    }
+
+    private void FixedUpdate()
+    {
+        // Y軸の最大速度を制限
+        if (rb != null && maxYVelocity > 0f)
+        {
+            Vector2 velocity = rb.linearVelocity;
+            
+            // Y軸の速度を制限
+            if (Mathf.Abs(velocity.y) > maxYVelocity)
+            {
+                velocity.y = Mathf.Sign(velocity.y) * maxYVelocity;
+                rb.linearVelocity = velocity;
+            }
+        }
     }
 
     /// <summary>

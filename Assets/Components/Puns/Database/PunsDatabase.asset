@@ -23,5 +23,5 @@ MonoBehaviour:
     text: "<color=#FF0000>\u77F3</color>\u304C<color=#FF0000>\u30B9\u30C8\u30FC\u30F3</color>\\n\u3068\u843D\u3061\u308B"
     fontSize: 30
   - id: Neko
-    text: "<color=#FF0000>\u30CD\u30B3</color>\u304C<color=#FF0000>\u5BDD\u8EE2\u3076</color>"
+    text: "<color=#FF0000>\u30CD\u30B3</color>\u304C\\n<color=#FF0000>\u5BDD\u8EE2\u3076</color>"
     fontSize: 40

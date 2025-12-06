@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6859731520305494971}
   - component: {fileID: 676775358983950291}
   - component: {fileID: 2370475134000982155}
+  - component: {fileID: 8904442835619115212}
   m_Layer: 0
   m_Name: Futon
   m_TagString: Untagged
@@ -105,7 +106,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: fb886f3e0fbf3a244a57e107a73f1c4a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -180,7 +181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76bb6c0407f726c4ea077288ac3caf8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FutonManager
-  maxDragSpeed: 20
+  maxDragSpeed: 30
   forceMultiplier: 0.5
   torqueMultiplier: 0.1
   maxThrowSpeed: 10
@@ -199,6 +200,8 @@ MonoBehaviour:
   triggerSpeedThreshold: 10
   punDisplayGenerator: {fileID: 2370475134000982155}
   punId: Futon
+  destroyInterval: 1
+  fadeOutDuration: 0.3
 --- !u!114 &2370475134000982155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,3 +218,19 @@ MonoBehaviour:
   punsDatabase: {fileID: 11400000, guid: 6a1b63335980f404692fbbe560acb4ed, type: 2}
   spawnOffset: {x: 0, y: 0, z: 0}
   displayDelay: 0.3
+--- !u!114 &8904442835619115212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6873337368556381936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
+  maxXVelocity: 40
+  maxYVelocity: 40
+  maxLinearVelocity: 0
+  maxAngularVelocity: 360

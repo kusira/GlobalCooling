@@ -14,6 +14,7 @@ public class PunDisplayShower : MonoBehaviour
     
     [Header("Object References")]
     private Transform mainCameraTransform; // MainCameraのTransform（自動検索）
+    private PunDisplayGenerator punDisplayGenerator; // PunDisplayGeneratorへの参照
     
     [Tooltip("集中線オブジェクト")]
     [SerializeField] private GameObject concentrationLineObject;
@@ -90,6 +91,15 @@ public class PunDisplayShower : MonoBehaviour
     public void SetMainCameraTransform(Transform cameraTransform)
     {
         mainCameraTransform = cameraTransform;
+    }
+    
+    /// <summary>
+    /// PunDisplayGeneratorを設定（外部から呼び出し可能）
+    /// </summary>
+    /// <param name="generator">PunDisplayGenerator</param>
+    public void SetPunDisplayGenerator(PunDisplayGenerator generator)
+    {
+        punDisplayGenerator = generator;
     }
     
     /// <summary>
@@ -360,6 +370,12 @@ public class PunDisplayShower : MonoBehaviour
         
         // Materialのクリーンアップ
         CleanupMaterial();
+        
+        // PunDisplayGeneratorに破棄を通知
+        if (punDisplayGenerator != null)
+        {
+            punDisplayGenerator.OnPunDisplayDestroyed();
+        }
     }
 
     private void OnDisable()

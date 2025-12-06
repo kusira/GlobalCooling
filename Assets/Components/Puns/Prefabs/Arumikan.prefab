@@ -513,6 +513,7 @@ GameObject:
   - component: {fileID: 6471037171276950975}
   - component: {fileID: 8944074904832557862}
   - component: {fileID: 5696622335396878814}
+  - component: {fileID: 4307795830963435007}
   m_Layer: 0
   m_Name: Arumikan
   m_TagString: Untagged
@@ -572,3 +573,20 @@ MonoBehaviour:
   judgmentTopObject: {fileID: 5903267693489071637}
   destroyInterval: 1
   fadeOutDuration: 0.3
+--- !u!114 &4307795830963435007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7643876661664173926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
+  maxXVelocity: 40
+  maxYVelocity: 40
+  maxLinearVelocity: 0
+  maxAngularVelocity: 360
+  enableCameraBoundary: 1

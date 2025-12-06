@@ -38,8 +38,6 @@ public class NekoTrigger : MonoBehaviour
     {
         // このオブジェクトとその子オブジェクトのSpriteRendererを取得
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
-        
-        Debug.Log($"NekoTrigger: 初期化完了 - triggerWaitTime: {triggerWaitTime}秒, minAngleDifference: {minAngleDifference}度, punId: {punId}");
     }
 
     private void Update()
@@ -51,16 +49,9 @@ public class NekoTrigger : MonoBehaviour
         {
             timer += Time.deltaTime;
             
-            // 定期的にタイマーの進捗を表示（0.5秒ごと）
-            if (Mathf.FloorToInt(timer * 2f) != Mathf.FloorToInt((timer - Time.deltaTime) * 2f))
-            {
-                Debug.Log($"NekoTrigger: タイマー進行中 - {timer:F2}秒 / {triggerWaitTime:F2}秒");
-            }
-            
             // 待機時間を超えたらダジャレを発生
             if (timer >= triggerWaitTime)
             {
-                Debug.Log($"NekoTrigger: 待機時間達成！ダジャレを発生させます。");
                 TriggerPun();
                 hasTriggered = true;
             }
@@ -70,14 +61,6 @@ public class NekoTrigger : MonoBehaviour
             // 条件を満たしていない場合はタイマーをリセット
             if (timer > 0f)
             {
-                if (!isTouchingGround)
-                {
-                    Debug.Log($"NekoTrigger: Groundに触れていないため、タイマーをリセット");
-                }
-                else if (!angleInRange)
-                {
-                    Debug.Log($"NekoTrigger: 角度が範囲外のため、タイマーをリセット");
-                }
                 timer = 0f;
             }
         }
@@ -114,18 +97,8 @@ public class NekoTrigger : MonoBehaviour
     {
         if (other.CompareTag("Ground"))
         {
-            Debug.Log($"NekoTrigger: Groundタグのオブジェクトに接触開始 - {other.gameObject.name}");
             isTouchingGround = true;
             timer = 0f; // タイマーをリセット
-            
-            // 現在の角度を表示
-            float currentAngle = transform.rotation.eulerAngles.z;
-            float angleDifference = Mathf.Abs(currentAngle - 0f);
-            if (angleDifference > 180f)
-            {
-                angleDifference = 360f - angleDifference;
-            }
-            Debug.Log($"NekoTrigger: 現在の角度: {currentAngle:F2}度, 0度との差: {angleDifference:F2}度, 範囲内: {angleDifference >= minAngleDifference}");
         }
     }
 
@@ -147,7 +120,6 @@ public class NekoTrigger : MonoBehaviour
     {
         if (other.CompareTag("Ground"))
         {
-            Debug.Log($"NekoTrigger: Groundタグのオブジェクトから離脱 - {other.gameObject.name}, タイマー: {timer:F2}秒");
             isTouchingGround = false;
             timer = 0f; // タイマーをリセット
             hasTriggered = false; // リセットして再度トリガー可能にする
@@ -161,12 +133,9 @@ public class NekoTrigger : MonoBehaviour
     {
         if (punDisplayGenerator == null)
         {
-            Debug.LogWarning($"NekoTrigger: PunDisplayGeneratorが設定されていません。GameObject: {gameObject.name}");
             return;
         }
 
-        Debug.Log($"NekoTrigger: ダジャレ発生！ID: \"{punId}\"");
-        
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId);
         
@@ -187,17 +156,11 @@ public class NekoTrigger : MonoBehaviour
         
         isFadingOut = true;
         
-        Debug.Log($"NekoTrigger: インターバル待機開始 ({destroyInterval}秒)");
-        
         // インターバル待機
         yield return new WaitForSeconds(destroyInterval);
         
-        Debug.Log($"NekoTrigger: インターバル終了。フェードアウトを開始します。");
-        
         // フェードアウト
         yield return StartCoroutine(FadeOut());
-        
-        Debug.Log($"NekoTrigger: フェードアウト完了。オブジェクトをDestroyします。");
         
         // Destroy
         Destroy(gameObject);
