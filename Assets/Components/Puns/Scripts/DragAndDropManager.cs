@@ -22,6 +22,7 @@ public class DragAndDropManager : MonoBehaviour
     private Vector3 dragOffset; // ドラッグ開始時のオフセット
     private Vector3 previousMousePosition; // 前フレームのマウス位置
     private bool isDragging = false;
+    private FutonTrigger currentFutonTrigger; // 現在ドラッグ中のFutonTrigger
 
     private void Awake()
     {
@@ -94,6 +95,9 @@ public class DragAndDropManager : MonoBehaviour
         {
             draggedObject = hit.rigidbody;
             
+            // FutonTriggerコンポーネントを取得
+            currentFutonTrigger = draggedObject.GetComponent<FutonTrigger>();
+            
             // ドラッグ開始時のオフセットを計算（クリック位置とオブジェクト中心の差）
             dragOffset = draggedObject.transform.position - mouseWorldPos;
             
@@ -157,14 +161,24 @@ public class DragAndDropManager : MonoBehaviour
         Vector3 forcePoint = mouseWorldPos; // マウスカーソルの位置
         Vector2 force = mouseVelocity * forceMultiplier;
         
+        // トルクを計算
+        float torque = CalculateTorque(mouseVelocity, forcePoint);
+        float finalTorque = torque * torqueMultiplier;
+        
         // 力を加える（マウス位置を起点として）
         draggedObject.AddForceAtPosition(force, forcePoint, ForceMode2D.Impulse);
         
         // トルクを加える（回転方向はマウスの移動方向に基づく）
-        float torque = CalculateTorque(mouseVelocity, forcePoint);
-        draggedObject.AddTorque(torque * torqueMultiplier, ForceMode2D.Impulse);
+        draggedObject.AddTorque(finalTorque, ForceMode2D.Impulse);
+        
+        // FutonTriggerにドラッグ終了を通知
+        if (currentFutonTrigger != null)
+        {
+            currentFutonTrigger.OnDragReleased(mouseVelocity);
+        }
         
         draggedObject = null;
+        currentFutonTrigger = null;
         isDragging = false;
     }
 
