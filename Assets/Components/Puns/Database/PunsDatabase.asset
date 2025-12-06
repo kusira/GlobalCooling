@@ -25,3 +25,9 @@ MonoBehaviour:
   - id: Neko
     text: "<color=#FF0000>\u30CD\u30B3</color>\u304C\\n<color=#FF0000>\u5BDD\u8EE2\u3076</color>"
     fontSize: 40
+  - id: Koutyou
+    text: "<color=#FF0000>\u6821\u9577</color>\u3001\\n<color=#FF0000>\u7D76\u597D\u8ABF</color>"
+    fontSize: 40
+  - id: Azarasi
+    text: "<color=#FF0000>\u30A2\u30B6\u30E9\u30B7</color>\u304C\\n<color=#FF0000>\u30A2\u30B6\u3089\u3057\u3044</color>"
+    fontSize: 32
