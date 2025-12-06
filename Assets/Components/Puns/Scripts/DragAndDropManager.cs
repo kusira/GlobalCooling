@@ -27,6 +27,7 @@ public class DragAndDropManager : MonoBehaviour
     private Vector3 previousMousePosition; // 前フレームのマウス位置
     private bool isDragging = false;
     private FutonTrigger currentFutonTrigger; // 現在ドラッグ中のFutonTrigger
+    private IsiTrigger currentIsiTrigger; // 現在ドラッグ中のIsiTrigger
 
     private void Awake()
     {
@@ -101,6 +102,9 @@ public class DragAndDropManager : MonoBehaviour
             
             // FutonTriggerコンポーネントを取得
             currentFutonTrigger = draggedObject.GetComponent<FutonTrigger>();
+            
+            // IsiTriggerコンポーネントを取得
+            currentIsiTrigger = draggedObject.GetComponent<IsiTrigger>();
             
             // ドラッグ開始時のオフセットを計算（クリック位置とオブジェクト中心の差）
             dragOffset = draggedObject.transform.position - mouseWorldPos;
@@ -200,8 +204,15 @@ public class DragAndDropManager : MonoBehaviour
             currentFutonTrigger.OnDragReleased(mouseVelocity);
         }
         
+        // IsiTriggerにドラッグ終了を通知
+        if (currentIsiTrigger != null)
+        {
+            currentIsiTrigger.OnDragReleased(mouseVelocity);
+        }
+        
         draggedObject = null;
         currentFutonTrigger = null;
+        currentIsiTrigger = null;
         isDragging = false;
     }
 

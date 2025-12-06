@@ -13,6 +13,8 @@ public class PunDisplayShower : MonoBehaviour
     [SerializeField] private float displayDuration = 3f;
     
     [Header("Object References")]
+    private Transform mainCameraTransform; // MainCameraのTransform（自動検索）
+    
     [Tooltip("集中線オブジェクト")]
     [SerializeField] private GameObject concentrationLineObject;
     
@@ -78,8 +80,28 @@ public class PunDisplayShower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// MainCameraのTransformを設定（外部から呼び出し可能）
+    /// </summary>
+    /// <param name="cameraTransform">MainCameraのTransform</param>
+    public void SetMainCameraTransform(Transform cameraTransform)
+    {
+        mainCameraTransform = cameraTransform;
+    }
+
     private void Start()
     {
+        // MainCameraのTransformを自動検索
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            mainCameraTransform = mainCamera.transform;
+        }
+        else
+        {
+            Debug.LogWarning("PunDisplayShower: MainCameraが見つかりません。");
+        }
+        
         // TextMeshProコンポーネントを取得（3Dオブジェクト用）
         if (punText != null)
         {
@@ -112,6 +134,20 @@ public class PunDisplayShower : MonoBehaviour
 
         // アニメーションを開始
         StartDisplayAnimation();
+    }
+
+    private void Update()
+    {
+        // MainCameraの位置にオブジェクトの中心を合わせる（XとYのみ、Zは変更しない）
+        if (mainCameraTransform != null)
+        {
+            Vector3 currentPos = transform.position;
+            transform.position = new Vector3(
+                mainCameraTransform.position.x,
+                mainCameraTransform.position.y,
+                currentPos.z
+            );
+        }
     }
 
 
