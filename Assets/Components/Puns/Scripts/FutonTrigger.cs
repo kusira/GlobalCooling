@@ -14,8 +14,8 @@ public class FutonTrigger : MonoBehaviour
     [Tooltip("PunDisplayGeneratorへの参照")]
     [SerializeField] private PunDisplayGenerator punDisplayGenerator;
     
-    [Tooltip("ダジャレのID（デフォルト: \"1\" = ふとんが吹っ飛んだ）")]
-    [SerializeField] private string punId = "1";
+    [Tooltip("ダジャレのID")]
+    [SerializeField] private string punId = "futon";
     
     private Rigidbody2D rb;
 

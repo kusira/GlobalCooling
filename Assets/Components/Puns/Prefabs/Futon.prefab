@@ -180,8 +180,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76bb6c0407f726c4ea077288ac3caf8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FutonManager
-  forceMultiplier: 1
-  torqueMultiplier: 0.25
+  maxDragSpeed: 20
+  forceMultiplier: 0.5
+  torqueMultiplier: 0.1
   maxThrowSpeed: 10
 --- !u!114 &676775358983950291
 MonoBehaviour:
@@ -213,3 +214,4 @@ MonoBehaviour:
   punDisplayPrefab: {fileID: 3663420597882631773, guid: bfd9a05d1b993b74e8a2652046107928, type: 3}
   punsDatabase: {fileID: 11400000, guid: 6a1b63335980f404692fbbe560acb4ed, type: 2}
   spawnOffset: {x: 0, y: 0, z: 0}
+  displayDelay: 0.3

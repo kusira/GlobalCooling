@@ -61,6 +61,23 @@ public class PunDisplayShower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// フォントサイズを設定（外部から呼び出し可能）
+    /// </summary>
+    /// <param name="size">フォントサイズ</param>
+    public void SetFontSize(float size)
+    {
+        if (textMeshPro == null && punText != null)
+        {
+            textMeshPro = punText.GetComponent<TMPro.TextMeshPro>();
+        }
+
+        if (textMeshPro != null)
+        {
+            textMeshPro.fontSize = size;
+        }
+    }
+
     private void Start()
     {
         // TextMeshProコンポーネントを取得（3Dオブジェクト用）

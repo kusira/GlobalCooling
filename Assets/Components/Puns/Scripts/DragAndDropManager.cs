@@ -7,15 +7,19 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class DragAndDropManager : MonoBehaviour
 {
+    [Header("Drag Settings")]
+    [Tooltip("ドラッグ中の最大移動速度（0以下で無制限）")]
+    [SerializeField] private float maxDragSpeed = 20f;
+    
     [Header("Throw Settings")]
-    [Tooltip("離したときに加える力の倍率")]
+    [Tooltip("離したときに加える力の係数")]
     [SerializeField] private float forceMultiplier = 1f;
     
     [Tooltip("離したときに加えるトルクの倍率")]
-    [SerializeField] private float torqueMultiplier = 0.25f;
+    [SerializeField] private float torqueMultiplier = 0.5f;
     
     [Tooltip("投げたときの最大速度（0以下で無制限）")]
-    [SerializeField] private float maxThrowSpeed = 10f;
+    [SerializeField] private float maxThrowSpeed = 0.1f;
     
     private Camera mainCamera;
     private Rigidbody2D draggedObject;
@@ -124,6 +128,24 @@ public class DragAndDropManager : MonoBehaviour
         // オフセットを考慮した目標位置（カーソルが真ん中に吸われないようにオフセットを保持）
         Vector3 targetPosition = mouseWorldPos + dragOffset;
         
+        // 現在の位置から目標位置へのベクトル
+        Vector3 currentPosition = draggedObject.transform.position;
+        Vector3 direction = targetPosition - currentPosition;
+        
+        // 最大速度を制限
+        if (maxDragSpeed > 0f)
+        {
+            float distance = direction.magnitude;
+            float maxDistancePerFrame = maxDragSpeed * Time.fixedDeltaTime;
+            
+            if (distance > maxDistancePerFrame)
+            {
+                // 最大速度を超える場合は、最大速度で移動
+                direction = direction.normalized * maxDistancePerFrame;
+                targetPosition = currentPosition + direction;
+            }
+        }
+        
         // MovePositionを使用して物理演算を維持しながら位置を更新
         draggedObject.MovePosition(targetPosition);
         
@@ -159,6 +181,7 @@ public class DragAndDropManager : MonoBehaviour
         
         // マウス位置を起点として力を加える
         Vector3 forcePoint = mouseWorldPos; // マウスカーソルの位置
+        // 投げる力に係数をかける
         Vector2 force = mouseVelocity * forceMultiplier;
         
         // トルクを計算
@@ -239,5 +262,36 @@ public class DragAndDropManager : MonoBehaviour
     private void OnDisable()
     {
         EndDrag();
+    }
+
+    /// <summary>
+    /// 指定されたRigidbody2Dがドラッグ中かどうかを判定
+    /// </summary>
+    /// <param name="rb">判定対象のRigidbody2D</param>
+    /// <returns>ドラッグ中の場合true</returns>
+    public bool IsDragging(Rigidbody2D rb)
+    {
+        return isDragging && draggedObject == rb;
+    }
+
+    /// <summary>
+    /// 指定されたGameObjectがドラッグ中かどうかを判定
+    /// </summary>
+    /// <param name="obj">判定対象のGameObject</param>
+    /// <returns>ドラッグ中の場合true</returns>
+    public bool IsDragging(GameObject obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        
+        Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            return false;
+        }
+        
+        return IsDragging(rb);
     }
 }

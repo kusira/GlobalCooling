@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PunsDatabase
   puns:
   - id: Futon
-    text: "<b><color=#FF0000>\u3075\u3068\u3093</color></b>\\n<b><color=#FF0000>\u5439\u3063\u98DB\u3093</color></b>\u3060"
+    text: "<color=#FF0000>\u3075\u3068\u3093</color>\u304C\\n<color=#FF0000>\u5439\u3063\u98DB\u3093</color>\u3060"
+    fontSize: 30
   - id: Arumikan
     text: "<color=#FF0000>\u30A2\u30EB\u30DF\u7F36\u306E\u4E0A\u306B</color>\\n\u3042\u308B<color=#FF0000>\u307F\u304B\u3093</color>"
+    fontSize: 24

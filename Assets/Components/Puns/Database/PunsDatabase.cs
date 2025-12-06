@@ -17,6 +17,9 @@ public class PunsDatabase : ScriptableObject
         [Tooltip("ダジャレのテキスト")]
         [TextArea(2, 4)]
         public string text;
+        
+        [Tooltip("フォントサイズ（デフォルト: 30）")]
+        public float fontSize = 30f;
     }
 
     [Header("Puns Data")]

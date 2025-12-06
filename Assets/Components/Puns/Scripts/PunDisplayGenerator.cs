@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Linq;
 
 /// <summary>
@@ -17,6 +18,9 @@ public class PunDisplayGenerator : MonoBehaviour
     [Header("Generation Settings")]
     [Tooltip("生成位置のオフセット")]
     [SerializeField] private Vector3 spawnOffset = Vector3.zero;
+    
+    [Tooltip("投げてからPunDisplayが表示されるまでの遅延時間（秒、デフォルト: 0.3）")]
+    [SerializeField] private float displayDelay = 0.3f;
     
     private Transform punsParentTransform; // 「Puns」という名前のGameObjectのTransform
 
@@ -50,16 +54,32 @@ public class PunDisplayGenerator : MonoBehaviour
     /// <param name="punId">ダジャレのID</param>
     public void GeneratePun(string punId)
     {
+        // 遅延してから実際に生成する
+        StartCoroutine(GeneratePunDelayed(punId));
+    }
+
+    /// <summary>
+    /// 遅延してからダジャレを生成
+    /// </summary>
+    /// <param name="punId">ダジャレのID</param>
+    private IEnumerator GeneratePunDelayed(string punId)
+    {
+        // 遅延時間を待つ
+        if (displayDelay > 0f)
+        {
+            yield return new WaitForSeconds(displayDelay);
+        }
+
         if (punsDatabase == null)
         {
             Debug.LogError("PunDisplayGenerator: PunsDatabaseが設定されていません。");
-            return;
+            yield break;
         }
 
         if (punDisplayPrefab == null)
         {
             Debug.LogError("PunDisplayGenerator: PunDisplayPrefabが設定されていません。");
-            return;
+            yield break;
         }
 
         // データベースからダジャレを取得
@@ -72,7 +92,7 @@ public class PunDisplayGenerator : MonoBehaviour
             // デバッグ: データベース内のすべてのIDを表示
             var allPuns = punsDatabase.GetAllPuns();
             Debug.LogWarning($"PunDisplayGenerator: データベース内のID一覧: {string.Join(", ", allPuns.Select(p => $"\"{p.id}\""))}");
-            return;
+            yield break;
         }
 
         // 「Puns」親オブジェクトを再検索（念のため）
@@ -90,6 +110,9 @@ public class PunDisplayGenerator : MonoBehaviour
         {
             // テキストを設定
             punDisplayShower.SetText(punData.text);
+            
+            // フォントサイズを設定（デフォルト30）
+            punDisplayShower.SetFontSize(punData.fontSize);
             
             // ConcentrateLineのMaterialのDelayを0~10でランダムに設定
             SetupConcentrateLineMaterial(punDisplayShower);
