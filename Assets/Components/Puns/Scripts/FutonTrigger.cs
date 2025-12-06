@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// ふとんのトリガーを管理するスクリプト
@@ -17,7 +18,16 @@ public class FutonTrigger : MonoBehaviour
     [Tooltip("ダジャレのID")]
     [SerializeField] private string punId = "futon";
     
+    [Header("Fade Out Settings")]
+    [Tooltip("ダジャレ発生後のインターバル（秒）")]
+    [SerializeField] private float destroyInterval = 1f;
+    
+    [Tooltip("フェードアウト時間（秒）")]
+    [SerializeField] private float fadeOutDuration = 0.3f;
+    
     private Rigidbody2D rb;
+    private SpriteRenderer[] spriteRenderers; // このオブジェクトと子オブジェクトのSpriteRenderer
+    private bool isFadingOut = false; // フェードアウト中かどうか
 
     private void Awake()
     {
@@ -26,6 +36,9 @@ public class FutonTrigger : MonoBehaviour
         {
             Debug.LogError($"FutonTrigger: Rigidbody2Dが見つかりません。GameObject: {gameObject.name}");
         }
+        
+        // このオブジェクトと子オブジェクトのSpriteRendererを取得
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
     }
 
     /// <summary>
@@ -34,6 +47,12 @@ public class FutonTrigger : MonoBehaviour
     /// <param name="releaseVelocity">離したときの速度</param>
     public void OnDragReleased(Vector3 releaseVelocity)
     {
+        // 投げる力のベクトルのY成分が正（上向き）である必要がある
+        if (releaseVelocity.y <= 0f)
+        {
+            return;
+        }
+        
         // 速度の大きさを計算
         float speed = releaseVelocity.magnitude;
         
@@ -58,6 +77,85 @@ public class FutonTrigger : MonoBehaviour
 
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId);
+        
+        // インターバル後にフェードアウトしてDestroy
+        StartCoroutine(DestroyAfterFadeOut());
+    }
+    
+    /// <summary>
+    /// インターバル後にフェードアウトしてDestroy
+    /// </summary>
+    private IEnumerator DestroyAfterFadeOut()
+    {
+        // 既にフェードアウト中の場合は何もしない
+        if (isFadingOut)
+        {
+            yield break;
+        }
+        
+        isFadingOut = true;
+        
+        // インターバル待機
+        yield return new WaitForSeconds(destroyInterval);
+        
+        // フェードアウト
+        yield return StartCoroutine(FadeOut());
+        
+        // Destroy
+        Destroy(gameObject);
+    }
+    
+    /// <summary>
+    /// フェードアウト処理
+    /// </summary>
+    private IEnumerator FadeOut()
+    {
+        if (spriteRenderers == null || spriteRenderers.Length == 0)
+        {
+            yield break;
+        }
+        
+        // 各SpriteRendererの初期Alpha値を保存
+        float[] initialAlphas = new float[spriteRenderers.Length];
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            if (spriteRenderers[i] != null)
+            {
+                initialAlphas[i] = spriteRenderers[i].color.a;
+            }
+        }
+        
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < fadeOutDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeOutDuration);
+            
+            // 各SpriteRendererのAlphaを更新
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                if (spriteRenderers[i] != null)
+                {
+                    Color color = spriteRenderers[i].color;
+                    color.a = initialAlphas[i] * alpha;
+                    spriteRenderers[i].color = color;
+                }
+            }
+            
+            yield return null;
+        }
+        
+        // 最終的にAlphaを0に設定
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            if (spriteRenderers[i] != null)
+            {
+                Color color = spriteRenderers[i].color;
+                color.a = 0f;
+                spriteRenderers[i].color = color;
+            }
+        }
     }
 
     /// <summary>

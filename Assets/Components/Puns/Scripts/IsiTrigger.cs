@@ -25,7 +25,16 @@ public class IsiTrigger : MonoBehaviour
     [Tooltip("石オブジェクト")]
     [SerializeField] private GameObject stoneObject;
     
+    [Header("Fade Out Settings")]
+    [Tooltip("ダジャレ発生後のインターバル（秒）")]
+    [SerializeField] private float destroyInterval = 1f;
+    
+    [Tooltip("フェードアウト時間（秒）")]
+    [SerializeField] private float fadeOutDuration = 0.3f;
+    
     private Rigidbody2D rb;
+    private SpriteRenderer[] spriteRenderers; // このオブジェクトとその子オブジェクトのSpriteRenderer
+    private bool isFadingOut = false; // フェードアウト中かどうか
 
     private void Awake()
     {
@@ -33,19 +42,10 @@ public class IsiTrigger : MonoBehaviour
         if (stoneObject != null)
         {
             rb = stoneObject.GetComponent<Rigidbody2D>();
-            if (rb == null)
-            {
-                Debug.LogError($"IsiTrigger: StoneオブジェクトにRigidbody2Dが見つかりません。GameObject: {stoneObject.name}");
-            }
-            else
-            {
-                Debug.Log($"IsiTrigger: 初期化完了 - Stone: {stoneObject.name}, minYPosition: {minYPosition}, triggerInterval: {triggerInterval}秒, punId: {punId}");
-            }
         }
-        else
-        {
-            Debug.LogError($"IsiTrigger: Stoneオブジェクトがアサインされていません。GameObject: {gameObject.name}");
-        }
+        
+        // このオブジェクトとその子オブジェクトのSpriteRendererを取得
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
     }
 
     /// <summary>
@@ -59,23 +59,12 @@ public class IsiTrigger : MonoBehaviour
         {
             float yPosition = stoneObject.transform.position.y;
             
-            Debug.Log($"IsiTrigger: ドラッグ終了 - Y座標: {yPosition:F2}, 閾値: {minYPosition:F2}, 速度: {releaseVelocity.magnitude:F2}");
-            
             // Y軸が閾値以上かチェック
             if (yPosition >= minYPosition)
             {
-                Debug.Log($"IsiTrigger: トリガー条件を満たしました！インターバル({triggerInterval}秒)後にダジャレを発生させます。");
                 // インターバル後にダジャレを成立させる
                 StartCoroutine(TriggerPunDelayed());
             }
-            else
-            {
-                Debug.Log($"IsiTrigger: Y座標が閾値未満のため、トリガーしません。");
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"IsiTrigger: Stoneオブジェクトがnullです。");
         }
     }
 
@@ -84,12 +73,8 @@ public class IsiTrigger : MonoBehaviour
     /// </summary>
     private IEnumerator TriggerPunDelayed()
     {
-        Debug.Log($"IsiTrigger: インターバル待機開始 ({triggerInterval}秒)");
-        
         // インターバル時間を待つ
         yield return new WaitForSeconds(triggerInterval);
-        
-        Debug.Log($"IsiTrigger: インターバル終了。ダジャレを発生させます。");
         
         // ダジャレを成立させる
         TriggerPun();
@@ -102,14 +87,90 @@ public class IsiTrigger : MonoBehaviour
     {
         if (punDisplayGenerator == null)
         {
-            Debug.LogWarning($"IsiTrigger: PunDisplayGeneratorが設定されていません。GameObject: {gameObject.name}");
             return;
         }
 
-        Debug.Log($"IsiTrigger: ダジャレ発生！ID: \"{punId}\"");
-        
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId);
+        
+        // インターバル後にフェードアウトしてDestroy
+        StartCoroutine(DestroyAfterFadeOut());
+    }
+    
+    /// <summary>
+    /// インターバル後にフェードアウトしてDestroy
+    /// </summary>
+    private IEnumerator DestroyAfterFadeOut()
+    {
+        // 既にフェードアウト中の場合は何もしない
+        if (isFadingOut)
+        {
+            yield break;
+        }
+        
+        isFadingOut = true;
+        
+        // インターバル待機
+        yield return new WaitForSeconds(destroyInterval);
+        
+        // フェードアウト
+        yield return StartCoroutine(FadeOut());
+        
+        // Destroy
+        Destroy(gameObject);
+    }
+    
+    /// <summary>
+    /// フェードアウト処理
+    /// </summary>
+    private IEnumerator FadeOut()
+    {
+        if (spriteRenderers == null || spriteRenderers.Length == 0)
+        {
+            yield break;
+        }
+        
+        // 各SpriteRendererの初期Alpha値を保存
+        float[] initialAlphas = new float[spriteRenderers.Length];
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            if (spriteRenderers[i] != null)
+            {
+                initialAlphas[i] = spriteRenderers[i].color.a;
+            }
+        }
+        
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < fadeOutDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeOutDuration);
+            
+            // 各SpriteRendererのAlphaを更新
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                if (spriteRenderers[i] != null)
+                {
+                    Color color = spriteRenderers[i].color;
+                    color.a = initialAlphas[i] * alpha;
+                    spriteRenderers[i].color = color;
+                }
+            }
+            
+            yield return null;
+        }
+        
+        // 最終的にAlphaを0に設定
+        for (int i = 0; i < spriteRenderers.Length; i++)
+        {
+            if (spriteRenderers[i] != null)
+            {
+                Color color = spriteRenderers[i].color;
+                color.a = 0f;
+                spriteRenderers[i].color = color;
+            }
+        }
     }
 
     /// <summary>

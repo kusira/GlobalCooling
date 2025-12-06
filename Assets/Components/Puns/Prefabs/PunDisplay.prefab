@@ -244,9 +244,9 @@ MonoBehaviour:
   concentrationLineObject: {fileID: 5579560362469432228}
   punText: {fileID: 3394491714157139079}
   initialTextScale: 5
-  textScaleDuration: 0.3
+  textScaleDuration: 0.2
   textScaleEase: 15
-  fadeOutDuration: 0.3
+  fadeOutDuration: 0.2
 --- !u!1 &5579560362469432228
 GameObject:
   m_ObjectHideFlags: 0
