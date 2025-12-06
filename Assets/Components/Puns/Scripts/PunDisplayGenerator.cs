@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
@@ -25,6 +26,7 @@ public class PunDisplayGenerator : MonoBehaviour
     private Transform punsParentTransform; // 「Puns」という名前のGameObjectのTransform
     private bool isDisplaying = false; // 現在PunDisplayが表示中かどうか
     private GameObject currentPunDisplay; // 現在表示中のPunDisplay
+    private HashSet<GameObject> triggeredGameObjects = new HashSet<GameObject>(); // 既にダジャレを発生させたGameObject
 
     private void Awake()
     {
@@ -51,11 +53,30 @@ public class PunDisplayGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// ダジャレを生成
+    /// ダジャレを生成（互換性のため、呼び出し元のGameObjectを自動検出）
     /// </summary>
     /// <param name="punId">ダジャレのID</param>
     public void GeneratePun(string punId)
     {
+        // 呼び出し元のGameObjectを検出（スタックトレースから）
+        // ただし、これは信頼性が低いため、明示的にGameObjectを渡すバージョンを使用することを推奨
+        GeneratePun(punId, null);
+    }
+    
+    /// <summary>
+    /// ダジャレを生成
+    /// </summary>
+    /// <param name="punId">ダジャレのID</param>
+    /// <param name="caller">呼び出し元のGameObject（nullの場合はチェックをスキップ）</param>
+    public void GeneratePun(string punId, GameObject caller)
+    {
+        // 呼び出し元のGameObjectが既にダジャレを発生させている場合は生成しない
+        if (caller != null && triggeredGameObjects.Contains(caller))
+        {
+            Debug.Log($"PunDisplayGenerator: GameObject \"{caller.name}\" は既にダジャレを発生済みのため、生成をスキップします。");
+            return;
+        }
+        
         // 既に表示中の場合は生成しない
         if (isDisplaying)
         {
@@ -63,14 +84,15 @@ public class PunDisplayGenerator : MonoBehaviour
         }
         
         // 遅延してから実際に生成する
-        StartCoroutine(GeneratePunDelayed(punId));
+        StartCoroutine(GeneratePunDelayed(punId, caller));
     }
 
     /// <summary>
     /// 遅延してからダジャレを生成
     /// </summary>
     /// <param name="punId">ダジャレのID</param>
-    private IEnumerator GeneratePunDelayed(string punId)
+    /// <param name="caller">呼び出し元のGameObject</param>
+    private IEnumerator GeneratePunDelayed(string punId, GameObject caller)
     {
         // 遅延時間を待つ
         if (displayDelay > 0f)
@@ -109,6 +131,12 @@ public class PunDisplayGenerator : MonoBehaviour
             FindPunsParent();
         }
 
+        // 呼び出し元のGameObjectが既にダジャレを発生させている場合は生成しない（コルーチン中に他のトリガーが発動した場合の対策）
+        if (caller != null && triggeredGameObjects.Contains(caller))
+        {
+            yield break;
+        }
+        
         // 既に表示中の場合は生成しない（コルーチン中に他のトリガーが発動した場合の対策）
         if (isDisplaying)
         {
@@ -146,6 +174,12 @@ public class PunDisplayGenerator : MonoBehaviour
             
             // PunDisplayShowerが破棄されたときに通知を受け取る
             punDisplayShower.SetPunDisplayGenerator(this);
+            
+            // 正常に生成されたので、呼び出し元のGameObjectを記録
+            if (caller != null)
+            {
+                triggeredGameObjects.Add(caller);
+            }
         }
         else
         {
@@ -153,6 +187,8 @@ public class PunDisplayGenerator : MonoBehaviour
             // PunDisplayShowerが見つからない場合はフラグをリセット
             isDisplaying = false;
             currentPunDisplay = null;
+            // 生成に失敗したので、生成されたインスタンスを破棄
+            Destroy(instance);
         }
     }
     
