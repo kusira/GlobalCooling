@@ -25,6 +25,9 @@ public class ToireTrigger : MonoBehaviour
     [SerializeField] private string punId = "Toire";
     
     [Header("Reaction Settings")]
+    [Tooltip("受け取った後のスプライト（受け取る前のスプライトは自動で保存されます）")]
+    [SerializeField] private Sprite receivedSprite;
+    
     [Tooltip("受け取るオブジェクトの色を変更する色（インスペクタで指定）")]
     [SerializeField] private Color reactionColor = Color.green;
     
@@ -60,6 +63,7 @@ public class ToireTrigger : MonoBehaviour
     private SpriteRenderer[] receiveSpriteRenderers; // 受け取るオブジェクトとその子オブジェクトのSpriteRenderer
     private Vector3 receiveOriginalScale; // 受け取るオブジェクトの元のScale
     private Color[] receiveOriginalColors; // 受け取るオブジェクトの元の色
+    private Sprite[] receiveOriginalSprites; // 受け取るオブジェクトの元のスプライト
     private bool hasTriggered = false; // 既にダジャレが発生したか
     private bool isFadingOut = false; // フェードアウト中かどうか
     private bool isHovering = false; // 与えるオブジェクトがホバー中かどうか
@@ -74,15 +78,17 @@ public class ToireTrigger : MonoBehaviour
             receiveSpriteRenderers = toiletObject.GetComponentsInChildren<SpriteRenderer>();
             receiveOriginalScale = toiletObject.transform.localScale;
             
-            // 元の色を保存
+            // 元の色とスプライトを保存
             if (receiveSpriteRenderers != null && receiveSpriteRenderers.Length > 0)
             {
                 receiveOriginalColors = new Color[receiveSpriteRenderers.Length];
+                receiveOriginalSprites = new Sprite[receiveSpriteRenderers.Length];
                 for (int i = 0; i < receiveSpriteRenderers.Length; i++)
                 {
                     if (receiveSpriteRenderers[i] != null)
                     {
                         receiveOriginalColors[i] = receiveSpriteRenderers[i].color;
+                        receiveOriginalSprites[i] = receiveSpriteRenderers[i].sprite;
                     }
                 }
             }
@@ -247,6 +253,18 @@ public class ToireTrigger : MonoBehaviour
         
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId, gameObject);
+        
+        // 受け取った後のスプライトに変更
+        if (receivedSprite != null && receiveSpriteRenderers != null)
+        {
+            for (int i = 0; i < receiveSpriteRenderers.Length; i++)
+            {
+                if (receiveSpriteRenderers[i] != null)
+                {
+                    receiveSpriteRenderers[i].sprite = receivedSprite;
+                }
+            }
+        }
         
         // 受け取るオブジェクトのリアクション（色変更とScale）
         if (reactionCoroutine != null)

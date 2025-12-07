@@ -199,6 +199,7 @@ public class PunDisplayShower : MonoBehaviour
             displaySequence.Append(
                 punText.transform.DOScale(Vector3.one, textScaleDuration)
                     .SetEase(textScaleEase)
+                    .SetTarget(punText.transform)
             );
         }
 
@@ -213,6 +214,7 @@ public class PunDisplayShower : MonoBehaviour
             displaySequence.Join(
                 punText.transform.DOScale(Vector3.one * finalScale, scaleShrinkDuration)
                     .SetEase(Ease.Linear)
+                    .SetTarget(punText.transform)
             );
         }
 
@@ -224,16 +226,19 @@ public class PunDisplayShower : MonoBehaviour
         {
             // テキストの透明度を0にアニメーション
             textFadeTween = DOTween.To(
-                () => textMeshPro.color.a,
+                () => textMeshPro != null ? textMeshPro.color.a : 0f,
                 alpha =>
                 {
-                    Color color = textMeshPro.color;
-                    color.a = alpha;
-                    textMeshPro.color = color;
+                    if (textMeshPro != null)
+                    {
+                        Color color = textMeshPro.color;
+                        color.a = alpha;
+                        textMeshPro.color = color;
+                    }
                 },
                 0f,
                 fadeOutDuration
-            );
+            ).SetTarget(textMeshPro);
         }
         
         // 集中線のマテリアルのRadiusを1.25にアニメーション（上限1.25）
@@ -246,14 +251,14 @@ public class PunDisplayShower : MonoBehaviour
                     // 上限1.25を超えないように制限
                     radius = Mathf.Min(radius, 1.25f);
                     currentRadius = radius;
-                    if (concentrationLineMaterial != null)
+                    if (concentrationLineMaterial != null && !concentrationLineMaterial.Equals(null))
                     {
                         concentrationLineMaterial.SetFloat("_Radius", radius);
                     }
                 },
                 1.25f,
                 fadeOutDuration
-            );
+            ).SetTarget(concentrationLineMaterial);
         }
         
         // テキストと集中線のアニメーションを並行実行
@@ -363,9 +368,25 @@ public class PunDisplayShower : MonoBehaviour
     private void OnDestroy()
     {
         // クリーンアップ
-        if (displaySequence != null && displaySequence.IsActive())
+        if (displaySequence != null)
         {
             displaySequence.Kill();
+            displaySequence = null;
+        }
+        
+        // すべてのDOTweenアニメーションを停止（このオブジェクトに関連するもの）
+        DOTween.Kill(transform);
+        if (punText != null)
+        {
+            DOTween.Kill(punText.transform);
+        }
+        if (textMeshPro != null)
+        {
+            DOTween.Kill(textMeshPro);
+        }
+        if (concentrationLineMaterial != null)
+        {
+            DOTween.Kill(concentrationLineMaterial);
         }
         
         // Materialのクリーンアップ
@@ -381,9 +402,25 @@ public class PunDisplayShower : MonoBehaviour
     private void OnDisable()
     {
         // 無効化時にもクリーンアップ
-        if (displaySequence != null && displaySequence.IsActive())
+        if (displaySequence != null)
         {
             displaySequence.Kill();
+            displaySequence = null;
+        }
+        
+        // すべてのDOTweenアニメーションを停止（このオブジェクトに関連するもの）
+        DOTween.Kill(transform);
+        if (punText != null)
+        {
+            DOTween.Kill(punText.transform);
+        }
+        if (textMeshPro != null)
+        {
+            DOTween.Kill(textMeshPro);
+        }
+        if (concentrationLineMaterial != null)
+        {
+            DOTween.Kill(concentrationLineMaterial);
         }
     }
 }

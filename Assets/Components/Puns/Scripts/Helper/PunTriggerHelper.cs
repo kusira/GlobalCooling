@@ -92,14 +92,28 @@ public static class PunTriggerHelper
         // 各SpriteRendererのAlphaをDOTweenでアニメーション
         foreach (SpriteRenderer renderer in spriteRenderers)
         {
-            if (renderer != null)
+            if (renderer != null && !renderer.Equals(null))
             {
-                Color originalColor = renderer.color;
-                float originalAlpha = originalColor.a;
+                // ローカル変数に保存（クロージャー用）
+                SpriteRenderer localRenderer = renderer;
                 
-                // Alphaを0にフェードアウト
-                renderer.DOFade(0f, fadeOutDuration)
-                    .SetEase(DG.Tweening.Ease.Linear);
+                // Alphaを0にフェードアウト（nullチェック付きで手動制御）
+                DOTween.To(
+                    () => localRenderer != null && !localRenderer.Equals(null) ? localRenderer.color.a : 0f,
+                    alpha =>
+                    {
+                        if (localRenderer != null && !localRenderer.Equals(null))
+                        {
+                            Color color = localRenderer.color;
+                            color.a = alpha;
+                            localRenderer.color = color;
+                        }
+                    },
+                    0f,
+                    fadeOutDuration
+                )
+                .SetEase(DG.Tweening.Ease.Linear)
+                .SetTarget(localRenderer);
             }
         }
     }

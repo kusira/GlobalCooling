@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// PrincipalのCollider2Dのトリガーイベントを検知して、KoutyouTriggerに転送するヘルパースクリプト
 /// </summary>
-public class PrincipalTriggerHelper : MonoBehaviour
+public class KoutyouTriggerHelper : MonoBehaviour
 {
     private KoutyouTrigger koutyouTrigger;
 
