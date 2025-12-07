@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 1706891950065399677}
   - component: {fileID: 4015494350374796884}
   - component: {fileID: 4090222767423594325}
+  - component: {fileID: 4948326579991416144}
   m_Layer: 0
   m_Name: Human
   m_TagString: Untagged
@@ -260,6 +261,23 @@ MonoBehaviour:
   forceMultiplier: 1
   torqueMultiplier: 0.5
   maxThrowSpeed: 0.1
+--- !u!114 &4948326579991416144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2267994086389974396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
+  maxXVelocity: 40
+  maxYVelocity: 40
+  maxLinearVelocity: 0
+  maxAngularVelocity: 360
+  enableCameraBoundary: 1
 --- !u!1 &6379439971053586497
 GameObject:
   m_ObjectHideFlags: 0

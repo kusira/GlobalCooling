@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8912870360329668846}
   - component: {fileID: 1544477357729615412}
   - component: {fileID: 3698904008168456869}
+  - component: {fileID: 1611738822066303462}
   m_Layer: 0
   m_Name: Tangerines
   m_TagString: Untagged
@@ -109,8 +110,6 @@ MonoBehaviour:
   forceMultiplier: 0.5
   torqueMultiplier: 0.1
   maxThrowSpeed: 10
-  dragableSignPrefab: {fileID: 5809871330989325152, guid: 7df47210637e0854486455d277a0cc16, type: 3}
-  signOffset: 0.5
 --- !u!61 &1544477357729615412
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -184,6 +183,23 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &1611738822066303462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 79023149529912020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
+  maxXVelocity: 40
+  maxYVelocity: 40
+  maxLinearVelocity: 0
+  maxAngularVelocity: 360
+  enableCameraBoundary: 1
 --- !u!1 &5903267693489071637
 GameObject:
   m_ObjectHideFlags: 0
@@ -470,7 +486,6 @@ GameObject:
   - component: {fileID: 6471037171276950975}
   - component: {fileID: 8944074904832557862}
   - component: {fileID: 5696622335396878814}
-  - component: {fileID: 4307795830963435007}
   m_Layer: 0
   m_Name: Arumikan
   m_TagString: Untagged
@@ -531,20 +546,3 @@ MonoBehaviour:
   destroyInterval: 1
   fadeOutDuration: 0.3
   shouldDestroy: 1
---- !u!114 &4307795830963435007
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7643876661664173926}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
-  maxXVelocity: 40
-  maxYVelocity: 40
-  maxLinearVelocity: 0
-  maxAngularVelocity: 360
-  enableCameraBoundary: 1

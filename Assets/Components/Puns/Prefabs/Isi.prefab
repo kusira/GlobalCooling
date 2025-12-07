@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 6000127924589310905}
   - component: {fileID: 2924616872769949152}
   - component: {fileID: 1965676171773805882}
+  - component: {fileID: 3196124197238110098}
   - component: {fileID: 5771140568621829162}
   - component: {fileID: 1552494440736061481}
   - component: {fileID: 1047016593428164717}
-  - component: {fileID: 3196124197238110098}
   m_Layer: 0
   m_Name: Isi
   m_TagString: Untagged
@@ -169,6 +169,23 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &3196124197238110098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7171712176482723441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
+  maxXVelocity: 40
+  maxYVelocity: 40
+  maxLinearVelocity: 0
+  maxAngularVelocity: 360
+  enableCameraBoundary: 1
 --- !u!114 &5771140568621829162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,8 +202,6 @@ MonoBehaviour:
   forceMultiplier: 1
   torqueMultiplier: 0.5
   maxThrowSpeed: 0.1
-  dragableSignPrefab: {fileID: 5809871330989325152, guid: 7df47210637e0854486455d277a0cc16, type: 3}
-  signOffset: 0.5
 --- !u!114 &1552494440736061481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,20 +238,3 @@ MonoBehaviour:
   destroyInterval: 1
   fadeOutDuration: 0.3
   shouldDestroy: 1
---- !u!114 &3196124197238110098
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7171712176482723441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f592c7019402949448577855cfaca68d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpeedLimiter
-  maxXVelocity: 40
-  maxYVelocity: 40
-  maxLinearVelocity: 0
-  maxAngularVelocity: 360
-  enableCameraBoundary: 1
