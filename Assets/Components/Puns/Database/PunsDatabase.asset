@@ -41,5 +41,8 @@ MonoBehaviour:
     text: "<color=#FF0000>\u30C8\u30A4\u30EC</color>\u306B\\n\u884C\u3063<color=#FF0000>\u3068\u3044\u308C</color>"
     fontSize: 40
   - id: Minka
-    text: "<color=#FF0000>\u6C11\u5BB6</color>\u306B\\n\u884C\u3063\u3066<color=#FF0000>\u307F\u3093\u304B</color>"
-    fontSize: 40
+    text: "<color=#FF0000>\u6C11\u5BB6</color>\u306B\\n\u884C\u3063\u3066<color=#FF0000>\u307F\u3093\u304B</color>\uFF1F"
+    fontSize: 30
+  - id: Kouyou
+    text: "<color=#FF0000>\u7D05\u8449</color>\u3092\u898B\u306B\\n\u884C<color=#FF0000>\u3053\u3046\u3088\u3046</color>"
+    fontSize: 30
