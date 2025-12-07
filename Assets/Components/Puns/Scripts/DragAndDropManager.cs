@@ -101,6 +101,13 @@ public class DragAndDropManager : MonoBehaviour
         {
             return;
         }
+        
+        // UI要素をクリックしている場合はドラッグを開始しない
+        if (UnityEngine.EventSystems.EventSystem.current != null && 
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
 
         // マウス位置からRaycastを飛ばしてオブジェクトを検出
         Vector3 mouseWorldPos = GetMouseWorldPosition();

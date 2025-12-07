@@ -101,6 +101,13 @@ public class MoveCamera : MonoBehaviour
     /// </summary>
     private void StartDrag()
     {
+        // UI要素をクリックしている場合はカメラドラッグを開始しない
+        if (UnityEngine.EventSystems.EventSystem.current != null && 
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+        
         // マウス位置からRaycastを飛ばしてオブジェクトを検出
         Vector3 mouseWorldPos = GetMouseWorldPosition();
         
