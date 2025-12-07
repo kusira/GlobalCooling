@@ -43,6 +43,10 @@ public class KoutyouTrigger : MonoBehaviour
     [Tooltip("ホバー時のスケールアップ/ダウンの時間（秒）")]
     [SerializeField] private float hoverScaleDuration = 0.2f;
     
+    [Header("Give Settings")]
+    [Tooltip("与えた後に与えたオブジェクトをDestroyするかどうか")]
+    [SerializeField] private bool shouldDestroyGivenObject = true;
+    
     [Header("Fade Out Settings")]
     [Tooltip("ダジャレ発生後のインターバル（秒）")]
     [SerializeField] private float destroyInterval = 1f;
@@ -60,6 +64,7 @@ public class KoutyouTrigger : MonoBehaviour
     private bool isFadingOut = false; // フェードアウト中かどうか
     private bool isHovering = false; // Beerがホバー中かどうか
     private Coroutine hoverScaleCoroutine; // ホバー時のスケールアニメーション用のコルーチン
+    private Coroutine reactionCoroutine; // リアクション用のコルーチン
     
     private void Awake()
     {
@@ -209,12 +214,8 @@ public class KoutyouTrigger : MonoBehaviour
         if (isBeer)
         {
             // Beerがドラッグ中かどうかをチェック
-            bool isDragging = false;
-            if (dragAndDropManager != null)
-            {
-                isDragging = dragAndDropManager.IsDragging(beerObject);
-                Debug.Log($"KoutyouTrigger: Beerがドラッグ中: {isDragging}");
-            }
+            bool isDragging = GiveGimmickHelper.IsDragging(beerObject, dragAndDropManager);
+            Debug.Log($"KoutyouTrigger: Beerがドラッグ中: {isDragging}");
             
             if (isDragging)
             {
@@ -250,11 +251,7 @@ public class KoutyouTrigger : MonoBehaviour
         if (isBeer)
         {
             // Beerがドラッグ中かどうかをチェック
-            bool isDragging = false;
-            if (dragAndDropManager != null)
-            {
-                isDragging = dragAndDropManager.IsDragging(beerObject);
-            }
+            bool isDragging = GiveGimmickHelper.IsDragging(beerObject, dragAndDropManager);
             
             if (isDragging)
             {
@@ -263,7 +260,13 @@ public class KoutyouTrigger : MonoBehaviour
                 {
                     Debug.Log("KoutyouTrigger: BeerがPrincipalにホバーしました。スケールアップします。");
                     isHovering = true;
-                    StartHoverScaleUp();
+                    GiveGimmickHelper.StartHoverScaleUp(
+                        this,
+                        principalObject,
+                        principalOriginalScale,
+                        hoverScaleMultiplier,
+                        hoverScaleDuration,
+                        ref hoverScaleCoroutine);
                 }
             }
             else
@@ -298,72 +301,14 @@ public class KoutyouTrigger : MonoBehaviour
             {
                 Debug.Log("KoutyouTrigger: BeerがPrincipalのトリガーから出ました。スケールを元に戻します。");
                 isHovering = false;
-                StartHoverScaleDown();
+                GiveGimmickHelper.StartHoverScaleDown(
+                    this,
+                    principalObject,
+                    principalOriginalScale,
+                    hoverScaleDuration,
+                    ref hoverScaleCoroutine);
             }
         }
-    }
-    
-    /// <summary>
-    /// ホバー時のスケールアップを開始
-    /// </summary>
-    private void StartHoverScaleUp()
-    {
-        if (principalObject == null)
-        {
-            return;
-        }
-        
-        // 既存のホバーアニメーションを停止
-        if (hoverScaleCoroutine != null)
-        {
-            StopCoroutine(hoverScaleCoroutine);
-        }
-        
-        hoverScaleCoroutine = StartCoroutine(HoverScaleAnimation(principalOriginalScale, principalOriginalScale * hoverScaleMultiplier));
-    }
-    
-    /// <summary>
-    /// ホバー時のスケールダウンを開始
-    /// </summary>
-    private void StartHoverScaleDown()
-    {
-        if (principalObject == null)
-        {
-            return;
-        }
-        
-        // 既存のホバーアニメーションを停止
-        if (hoverScaleCoroutine != null)
-        {
-            StopCoroutine(hoverScaleCoroutine);
-        }
-        
-        hoverScaleCoroutine = StartCoroutine(HoverScaleAnimation(principalObject.transform.localScale, principalOriginalScale));
-    }
-    
-    /// <summary>
-    /// ホバー時のスケールアニメーション
-    /// </summary>
-    private IEnumerator HoverScaleAnimation(Vector3 fromScale, Vector3 toScale)
-    {
-        if (principalObject == null)
-        {
-            yield break;
-        }
-        
-        float elapsedTime = 0f;
-        
-        while (elapsedTime < hoverScaleDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsedTime / hoverScaleDuration);
-            principalObject.transform.localScale = Vector3.Lerp(fromScale, toScale, t);
-            yield return null;
-        }
-        
-        // 最終的に目標のスケールに設定
-        principalObject.transform.localScale = toScale;
-        hoverScaleCoroutine = null;
     }
     
     /// <summary>
@@ -391,7 +336,7 @@ public class KoutyouTrigger : MonoBehaviour
         }
         
         // Beerを消す
-        if (beerObject != null)
+        if (shouldDestroyGivenObject && beerObject != null)
         {
             Debug.Log($"KoutyouTrigger: Beer({beerObject.name})を消します。");
             Destroy(beerObject);
@@ -404,7 +349,20 @@ public class KoutyouTrigger : MonoBehaviour
         
         // Principalのリアクション（色変更とScale）
         Debug.Log("KoutyouTrigger: Principalのリアクションを開始します。");
-        StartCoroutine(PrincipalReaction());
+        if (reactionCoroutine != null)
+        {
+            StopCoroutine(reactionCoroutine);
+        }
+        reactionCoroutine = GiveGimmickHelper.StartReaction(
+            this,
+            principalObject,
+            principalSpriteRenderers,
+            principalOriginalColors,
+            principalOriginalScale,
+            reactionColor,
+            colorChangeDuration,
+            scaleMultiplier,
+            scaleDuration);
         
         // インターバル後にフェードアウトしてDestroy（共通処理を使用）
         Debug.Log("KoutyouTrigger: フェードアウト処理を開始します。");
@@ -417,140 +375,4 @@ public class KoutyouTrigger : MonoBehaviour
             ref isFadingOut);
     }
     
-    /// <summary>
-    /// Principalのリアクション（色変更とScale）
-    /// </summary>
-    private IEnumerator PrincipalReaction()
-    {
-        if (principalObject == null || principalSpriteRenderers == null)
-        {
-            Debug.LogWarning("KoutyouTrigger: PrincipalまたはSpriteRendererが見つかりません。");
-            yield break;
-        }
-        
-        Debug.Log($"KoutyouTrigger: Principalの色とScaleを同時に変化させます。");
-        
-        // 色とScaleの目標値を設定
-        Vector3 targetScale = principalOriginalScale * scaleMultiplier;
-        Color[] targetColors = new Color[principalSpriteRenderers.Length];
-        for (int i = 0; i < principalSpriteRenderers.Length; i++)
-        {
-            if (principalSpriteRenderers[i] != null)
-            {
-                Color originalColor = principalOriginalColors[i];
-                targetColors[i] = new Color(reactionColor.r, reactionColor.g, reactionColor.b, originalColor.a);
-            }
-        }
-        
-        // 色のフェードインとScaleの拡大を同時に実行
-        float elapsedTime = 0f;
-        float maxDuration = Mathf.Max(colorChangeDuration, scaleDuration);
-        
-        while (elapsedTime < maxDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            
-            // 色のフェードイン（常に更新してスムーズに変化させる）
-            float colorT = 0f;
-            if (colorChangeDuration > 0f)
-            {
-                colorT = Mathf.Clamp01(elapsedTime / colorChangeDuration);
-            }
-            else
-            {
-                colorT = 1f; // 時間が0の場合は即座に変更
-            }
-            
-            for (int i = 0; i < principalSpriteRenderers.Length; i++)
-            {
-                if (principalSpriteRenderers[i] != null)
-                {
-                    Color originalColor = principalOriginalColors[i];
-                    principalSpriteRenderers[i].color = Color.Lerp(originalColor, targetColors[i], colorT);
-                }
-            }
-            
-            // Scaleの拡大
-            float scaleT = 0f;
-            if (scaleDuration > 0f)
-            {
-                scaleT = Mathf.Clamp01(elapsedTime / scaleDuration);
-            }
-            else
-            {
-                scaleT = 1f; // 時間が0の場合は即座に変更
-            }
-            principalObject.transform.localScale = Vector3.Lerp(principalOriginalScale, targetScale, scaleT);
-            
-            yield return null;
-        }
-        
-        // 最終的に目標値に設定（確実に目標値に到達させる）
-        for (int i = 0; i < principalSpriteRenderers.Length; i++)
-        {
-            if (principalSpriteRenderers[i] != null)
-            {
-                principalSpriteRenderers[i].color = targetColors[i];
-            }
-        }
-        principalObject.transform.localScale = targetScale;
-        
-        Debug.Log("KoutyouTrigger: Principalの色とScaleを元に戻します。");
-        
-        // 色のフェードアウトとScaleの縮小を同時に実行
-        elapsedTime = 0f;
-        maxDuration = Mathf.Max(colorChangeDuration, scaleDuration);
-        
-        while (elapsedTime < maxDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            
-            // 色のフェードアウト（常に更新してスムーズに変化させる）
-            float colorT = 0f;
-            if (colorChangeDuration > 0f)
-            {
-                colorT = Mathf.Clamp01(elapsedTime / colorChangeDuration);
-            }
-            else
-            {
-                colorT = 1f; // 時間が0の場合は即座に変更
-            }
-            
-            for (int i = 0; i < principalSpriteRenderers.Length; i++)
-            {
-                if (principalSpriteRenderers[i] != null)
-                {
-                    principalSpriteRenderers[i].color = Color.Lerp(targetColors[i], principalOriginalColors[i], colorT);
-                }
-            }
-            
-            // Scaleの縮小
-            float scaleT = 0f;
-            if (scaleDuration > 0f)
-            {
-                scaleT = Mathf.Clamp01(elapsedTime / scaleDuration);
-            }
-            else
-            {
-                scaleT = 1f; // 時間が0の場合は即座に変更
-            }
-            principalObject.transform.localScale = Vector3.Lerp(targetScale, principalOriginalScale, scaleT);
-            
-            yield return null;
-        }
-        
-        // 最終的に元のScaleに設定
-        principalObject.transform.localScale = principalOriginalScale;
-        
-        // 最終的に元の色に設定
-        for (int i = 0; i < principalSpriteRenderers.Length; i++)
-        {
-            if (principalSpriteRenderers[i] != null)
-            {
-                principalSpriteRenderers[i].color = principalOriginalColors[i];
-            }
-        }
-        
-        Debug.Log("KoutyouTrigger: Principalのリアクションが完了しました。");
-    }
 }

@@ -28,7 +28,7 @@ public class PunsDatabase : ScriptableObject
 
     /// <summary>
     /// ダジャレをIDで取得
-    /// </summary>
+/// </summary>
     public PunData GetPunById(string id)
     {
         return puns.Find(p => p.id == id);

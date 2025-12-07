@@ -185,6 +185,8 @@ MonoBehaviour:
   forceMultiplier: 1
   torqueMultiplier: 0.5
   maxThrowSpeed: 0.1
+  dragableSignPrefab: {fileID: 5809871330989325152, guid: 7df47210637e0854486455d277a0cc16, type: 3}
+  signOffset: 0.5
 --- !u!114 &1552494440736061481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -220,6 +222,7 @@ MonoBehaviour:
   stoneObject: {fileID: 7171712176482723441}
   destroyInterval: 1
   fadeOutDuration: 0.3
+  shouldDestroy: 1
 --- !u!114 &3196124197238110098
 MonoBehaviour:
   m_ObjectHideFlags: 0

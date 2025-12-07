@@ -185,6 +185,8 @@ MonoBehaviour:
   forceMultiplier: 0.5
   torqueMultiplier: 0.1
   maxThrowSpeed: 10
+  dragableSignPrefab: {fileID: 5809871330989325152, guid: 7df47210637e0854486455d277a0cc16, type: 3}
+  signOffset: 0.5
 --- !u!114 &676775358983950291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,10 +200,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FutonTrigger
   triggerSpeedThreshold: 10
+  maxYVelocity: 20
   punDisplayGenerator: {fileID: 2370475134000982155}
   punId: Futon
   destroyInterval: 1
   fadeOutDuration: 0.3
+  shouldDestroy: 1
 --- !u!114 &2370475134000982155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -234,3 +238,4 @@ MonoBehaviour:
   maxYVelocity: 40
   maxLinearVelocity: 0
   maxAngularVelocity: 360
+  enableCameraBoundary: 1

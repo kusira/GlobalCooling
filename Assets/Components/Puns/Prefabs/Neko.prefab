@@ -113,6 +113,7 @@ MonoBehaviour:
   punId: Neko
   destroyInterval: 1
   fadeOutDuration: 0.3
+  shouldDestroy: 1
 --- !u!114 &3982044863231142133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,6 +130,8 @@ MonoBehaviour:
   forceMultiplier: 1
   torqueMultiplier: 0.5
   maxThrowSpeed: 0.1
+  dragableSignPrefab: {fileID: 5809871330989325152, guid: 7df47210637e0854486455d277a0cc16, type: 3}
+  signOffset: 0.5
 --- !u!114 &5536380656393166249
 MonoBehaviour:
   m_ObjectHideFlags: 0
