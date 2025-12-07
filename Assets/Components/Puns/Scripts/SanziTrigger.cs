@@ -132,7 +132,6 @@ public class SanziTrigger : MonoBehaviour
             return;
         }
         
-        Debug.Log($"SanziTrigger: 時計の針が3時の位置に{triggerWaitTime}秒間留まりました。ダジャレを成立させます。");
         
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId, gameObject);

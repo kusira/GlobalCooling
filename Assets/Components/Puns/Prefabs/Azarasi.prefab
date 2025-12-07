@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7434010010042679443}
   - component: {fileID: 399750128527153771}
   - component: {fileID: 655329497923528028}
-  - component: {fileID: 3057362349304888767}
+  - component: {fileID: 3683987867804738728}
   m_Layer: 0
   m_Name: Azarasi
   m_TagString: Untagged
@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -3.5, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 8081694365238600136, guid: f1f6a03b3cf50bd4ba0d1eac7c2e59a4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -126,8 +126,12 @@ MonoBehaviour:
   punId: Azarasi
   destroyInterval: 1
   fadeOutDuration: 0.3
---- !u!61 &3057362349304888767
-BoxCollider2D:
+  shouldDestroy: 1
+  defaultSprite: {fileID: 8081694365238600136, guid: f1f6a03b3cf50bd4ba0d1eac7c2e59a4, type: 3}
+  spriteAt50Percent: {fileID: 4905795718935578576, guid: b50b2550287d0264bacc0923daedb0a4, type: 3}
+  spriteAt100Percent: {fileID: 9059354967947619461, guid: c974479969bc88f46973d26bae079e36, type: 3}
+--- !u!70 &3683987867804738728
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -160,15 +164,6 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Offset: {x: 0, y: 0.4}
+  m_Size: {x: 16.86, y: 5.3}
+  m_Direction: 1

@@ -225,4 +225,69 @@ public class MoveCamera : MonoBehaviour
         scrollbarCanvasGroup.interactable = false;
         scrollbarCanvasGroup.blocksRaycasts = false;
     }
+    
+    /// <summary>
+    /// カメラの視界範囲を取得
+    /// </summary>
+    /// <returns>左端と右端のX座標</returns>
+    public (float left, float right) GetCameraBounds()
+    {
+        if (mainCamera == null)
+        {
+            return (0f, 0f);
+        }
+        
+        float orthographicSize = mainCamera.orthographicSize;
+        float aspect = mainCamera.aspect;
+        float cameraWidth = orthographicSize * aspect * 2f;
+        
+        Vector3 cameraPos = transform.position;
+        float leftBound = cameraPos.x - cameraWidth * 0.5f;
+        float rightBound = cameraPos.x + cameraWidth * 0.5f;
+        
+        return (leftBound, rightBound);
+    }
+    
+    /// <summary>
+    /// カメラ位置を設定（範囲内に制限）
+    /// </summary>
+    /// <param name="targetX">目標X座標</param>
+    public void SetCameraPosition(float targetX)
+    {
+        float clampedX = Mathf.Clamp(targetX, minX, maxX);
+        transform.position = new Vector3(clampedX, transform.position.y, transform.position.z);
+    }
+    
+    /// <summary>
+    /// オブジェクトがカメラの視界内に収まるようにカメラ位置を調整
+    /// </summary>
+    /// <param name="objectX">オブジェクトのX座標</param>
+    public void FollowObject(float objectX)
+    {
+        if (mainCamera == null)
+        {
+            return;
+        }
+        
+        float orthographicSize = mainCamera.orthographicSize;
+        float aspect = mainCamera.aspect;
+        float cameraWidth = orthographicSize * aspect * 2f;
+        
+        Vector3 cameraPos = transform.position;
+        float leftBound = cameraPos.x - cameraWidth * 0.5f;
+        float rightBound = cameraPos.x + cameraWidth * 0.5f;
+        
+        // オブジェクトが左端より外に出そうな場合
+        if (objectX < leftBound)
+        {
+            float newCameraX = objectX + cameraWidth * 0.5f;
+            SetCameraPosition(newCameraX);
+        }
+        // オブジェクトが右端より外に出そうな場合
+        else if (objectX > rightBound)
+        {
+            float newCameraX = objectX - cameraWidth * 0.5f;
+            SetCameraPosition(newCameraX);
+        }
+    }
 }

@@ -28,6 +28,7 @@ public class DragAndDropManager : MonoBehaviour
     private bool isDragging = false;
     private FutonTrigger currentFutonTrigger; // 現在ドラッグ中のFutonTrigger
     private IsiTrigger currentIsiTrigger; // 現在ドラッグ中のIsiTrigger
+    private MoveCamera moveCamera; // カメラ移動制御
 
     private void Awake()
     {
@@ -41,6 +42,16 @@ public class DragAndDropManager : MonoBehaviour
         if (mainCamera == null)
         {
             Debug.LogError("DragAndDropManager: Cameraが見つかりません。");
+        }
+        
+        // MoveCameraコンポーネントを取得
+        if (mainCamera != null)
+        {
+            moveCamera = mainCamera.GetComponent<MoveCamera>();
+            if (moveCamera == null)
+            {
+                moveCamera = FindFirstObjectByType<MoveCamera>();
+            }
         }
     }
 
@@ -152,6 +163,12 @@ public class DragAndDropManager : MonoBehaviour
         
         // MovePositionを使用して物理演算を維持しながら位置を更新
         draggedObject.MovePosition(targetPosition);
+        
+        // オブジェクトがカメラの視界外に出そうな場合、カメラを追従させる
+        if (moveCamera != null)
+        {
+            moveCamera.FollowObject(targetPosition.x);
+        }
         
         // 次のフレーム用にマウス位置を記録
         previousMousePosition = mouseWorldPos;
