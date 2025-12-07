@@ -117,5 +117,30 @@ public static class PunTriggerHelper
             }
         }
     }
+    
+    /// <summary>
+    /// 指定されたGameObjectに付いているAudioSourceを再生（存在する場合のみ）
+    /// </summary>
+    /// <param name="targetObject">AudioSourceを検索する対象のGameObject</param>
+    public static void PlayAudioSource(GameObject targetObject)
+    {
+        if (targetObject == null)
+        {
+            return;
+        }
+        
+        // AudioSourceを取得（自身または子オブジェクトから）
+        AudioSource audioSource = targetObject.GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = targetObject.GetComponentInChildren<AudioSource>();
+        }
+        
+        // AudioSourceが見つかり、AudioClipが設定されている場合のみ再生
+        if (audioSource != null && audioSource.clip != null)
+        {
+            audioSource.Play();
+        }
+    }
 }
 

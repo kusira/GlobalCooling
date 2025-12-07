@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 
 /// <summary>
 /// ダジャレ成立時にPunDisplayのPrefabを生成するスクリプト
@@ -23,15 +24,43 @@ public class PunDisplayGenerator : MonoBehaviour
     [Tooltip("投げてからPunDisplayが表示されるまでの遅延時間（秒、デフォルト: 0.3）")]
     [SerializeField] private float displayDelay = 0.3f;
     
+    [Header("Score Settings")]
+    [Tooltip("スコアマネージャー（nullの場合は自動検索）")]
+    [SerializeField] private ScoreManager scoreManager;
+    
+    [Header("Camera Shake Settings")]
+    [Tooltip("カメラ振動の強さ")]
+    [SerializeField] private float shakeStrength = 0.2f;
+    
+    [Tooltip("カメラ振動の時間（秒）")]
+    [SerializeField] private float shakeDuration = 1.0f;
+    
+    [Tooltip("カメラ振動の振動数")]
+    [SerializeField] private int shakeVibrato = 10;
+    
     private Transform punsParentTransform; // 「Puns」という名前のGameObjectのTransform
     private bool isDisplaying = false; // 現在PunDisplayが表示中かどうか
     private GameObject currentPunDisplay; // 現在表示中のPunDisplay
     private HashSet<GameObject> triggeredGameObjects = new HashSet<GameObject>(); // 既にダジャレを発生させたGameObject
+    private Camera mainCamera; // メインカメラ
 
     private void Awake()
     {
         // 「Puns」という名前のGameObjectを検索
         FindPunsParent();
+        
+        // ScoreManagerを自動検索（インスペクタで設定されていない場合）
+        if (scoreManager == null)
+        {
+            scoreManager = FindFirstObjectByType<ScoreManager>();
+        }
+        
+        // メインカメラを取得
+        mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            mainCamera = FindFirstObjectByType<Camera>();
+        }
     }
 
     /// <summary>
@@ -180,6 +209,15 @@ public class PunDisplayGenerator : MonoBehaviour
             {
                 triggeredGameObjects.Add(caller);
             }
+            
+            // スコアをインクリメント
+            if (scoreManager != null)
+            {
+                scoreManager.IncrementScore();
+            }
+            
+            // カメラを振動させる
+            ShakeCamera();
         }
         else
         {
@@ -237,6 +275,24 @@ public class PunDisplayGenerator : MonoBehaviour
         {
             Debug.LogWarning("PunDisplayGenerator: ConcentrateLineのRendererまたはMaterialが見つかりません。");
         }
+    }
+    
+    /// <summary>
+    /// カメラを振動させる
+    /// </summary>
+    private void ShakeCamera()
+    {
+        if (mainCamera == null)
+        {
+            return;
+        }
+        
+        // 既存の振動アニメーションを停止
+        mainCamera.transform.DOKill();
+        
+        // カメラを振動させる（位置を振動）
+        mainCamera.transform.DOShakePosition(shakeDuration, shakeStrength, shakeVibrato, 90f, false, true, ShakeRandomnessMode.Full)
+            .SetTarget(mainCamera.transform);
     }
 }
 

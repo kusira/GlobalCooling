@@ -18,11 +18,6 @@ public class SpeedLimiter : MonoBehaviour
     [Tooltip("回転スピード（角速度）の最大値（0以下で無制限）")]
     [SerializeField] private float maxAngularVelocity = 360f;
     
-    [Header("Camera Boundary Settings")]
-    [Tooltip("カメラの境界で跳ね返すかどうか")]
-    [SerializeField] private bool enableCameraBoundary = true;
-    
-    private Camera mainCamera;
     private Rigidbody2D rb;
 
     private void Awake()
@@ -31,13 +26,6 @@ public class SpeedLimiter : MonoBehaviour
         if (rb == null)
         {
             Debug.LogError($"SpeedLimiter: Rigidbody2Dが見つかりません。GameObject: {gameObject.name}");
-        }
-        
-        // カメラの自動検索
-        mainCamera = Camera.main;
-        if (mainCamera == null)
-        {
-            mainCamera = UnityEngine.Object.FindFirstObjectByType<Camera>();
         }
     }
 
@@ -98,85 +86,6 @@ public class SpeedLimiter : MonoBehaviour
             {
                 rb.angularVelocity = Mathf.Sign(currentAngularVelocity) * maxAngularVelocity;
             }
-        }
-        
-        // カメラの境界処理
-        if (enableCameraBoundary)
-        {
-            HandleCameraBoundary();
-        }
-    }
-    
-    /// <summary>
-    /// カメラの境界でオブジェクトを跳ね返す
-    /// </summary>
-    private void HandleCameraBoundary()
-    {
-        if (mainCamera == null || rb == null)
-        {
-            return;
-        }
-        
-        // カメラの視野範囲を計算
-        float orthographicSize = mainCamera.orthographicSize;
-        float aspect = mainCamera.aspect;
-        float cameraWidth = orthographicSize * aspect * 2f;
-        float cameraHeight = orthographicSize * 2f;
-        
-        Vector3 cameraPos = mainCamera.transform.position;
-        float leftBound = cameraPos.x - cameraWidth * 0.5f;
-        float rightBound = cameraPos.x + cameraWidth * 0.5f;
-        float bottomBound = cameraPos.y - cameraHeight * 0.5f;
-        float topBound = cameraPos.y + cameraHeight * 0.5f;
-        
-        Vector2 currentVelocity = rb.linearVelocity;
-        Vector3 currentPos = transform.position;
-        bool velocityChanged = false;
-        
-        // X軸の境界チェック
-        if (currentPos.x <= leftBound && currentVelocity.x < 0f)
-        {
-            // 左端に当たった場合、X軸の速度を反転
-            currentVelocity.x = -currentVelocity.x;
-            velocityChanged = true;
-            // 位置を境界内にクランプ
-            currentPos.x = leftBound;
-            transform.position = currentPos;
-        }
-        else if (currentPos.x >= rightBound && currentVelocity.x > 0f)
-        {
-            // 右端に当たった場合、X軸の速度を反転
-            currentVelocity.x = -currentVelocity.x;
-            velocityChanged = true;
-            // 位置を境界内にクランプ
-            currentPos.x = rightBound;
-            transform.position = currentPos;
-        }
-        
-        // Y軸の境界チェック
-        if (currentPos.y <= bottomBound && currentVelocity.y < 0f)
-        {
-            // 下端に当たった場合、Y軸の速度を反転
-            currentVelocity.y = -currentVelocity.y;
-            velocityChanged = true;
-            // 位置を境界内にクランプ
-            currentPos.y = bottomBound;
-            transform.position = currentPos;
-        }
-        else if (currentPos.y >= topBound && currentVelocity.y > 0f)
-        {
-            // 上端に当たった場合、Y軸の速度を反転
-            currentVelocity.y = -currentVelocity.y;
-            velocityChanged = true;
-            // 位置を境界内にクランプ
-            currentPos.y = topBound;
-            transform.position = currentPos;
-        }
-        
-        // 速度を更新
-        if (velocityChanged)
-        {
-            rb.linearVelocity = currentVelocity;
         }
     }
 }

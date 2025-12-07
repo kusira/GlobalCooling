@@ -186,6 +186,7 @@ MonoBehaviour:
   maxLinearVelocity: 0
   maxAngularVelocity: 360
   enableCameraBoundary: 1
+  minBounceSpeed: 1
 --- !u!114 &5771140568621829162
 MonoBehaviour:
   m_ObjectHideFlags: 0

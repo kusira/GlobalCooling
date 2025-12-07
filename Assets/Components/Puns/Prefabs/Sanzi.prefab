@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4352962600525496432}
   - component: {fileID: 3926466547276739259}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: FireHouse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -119,8 +119,8 @@ Transform:
   m_GameObject: {fileID: 4416985915236156671}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.25, z: 0}
-  m_LocalScale: {x: 0.05, y: 0.6, z: 1}
+  m_LocalPosition: {x: -0.14, y: 1.1142856, z: 0}
+  m_LocalScale: {x: 2.21, y: 1.57, z: 5.7142854}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6609558120547773085}
@@ -171,8 +171,8 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 15
+  m_Sprite: {fileID: -993183575786483884, guid: 795c9133ba06e4947986b25459088307, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -195,11 +195,11 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 20
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: a4c4989c1fd066643865d44e6b83bd6d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -225,8 +225,8 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_BreakAction: 3
   m_AutoConfigureConnectedAnchor: 1
-  m_Anchor: {x: 0, y: -0.4}
-  m_ConnectedAnchor: {x: 0, y: 0.01999998}
+  m_Anchor: {x: -0.04, y: -0.87}
+  m_ConnectedAnchor: {x: 0.014319997, y: -0.05032289}
   m_UseConnectedAnchor: 1
   m_UseMotor: 0
   m_Motor:
@@ -274,7 +274,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 0.97, y: 2.57}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -308,9 +308,9 @@ Transform:
   m_GameObject: {fileID: 6200604700117038036}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0.06, y: 0, z: 0}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.1}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2483555476048278107}
   m_Father: {fileID: 137417210932742281}
@@ -361,8 +361,8 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 10
+  m_Sprite: {fileID: 4214149858688995037, guid: 8ea76fe964db55a48b175c4d5c406394, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -402,10 +402,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 6609558120547773085}
   - {fileID: 4352962600525496432}
+  - {fileID: 6609558120547773085}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3839640929963266584
@@ -445,3 +445,7 @@ MonoBehaviour:
   punsDatabase: {fileID: 11400000, guid: 6a1b63335980f404692fbbe560acb4ed, type: 2}
   spawnOffset: {x: 0, y: 0, z: 0}
   displayDelay: 0.3
+  scoreManager: {fileID: 0}
+  shakeStrength: 0.2
+  shakeDuration: 1
+  shakeVibrato: 10

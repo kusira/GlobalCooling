@@ -278,6 +278,7 @@ MonoBehaviour:
   maxLinearVelocity: 0
   maxAngularVelocity: 360
   enableCameraBoundary: 1
+  minBounceSpeed: 0.1
 --- !u!1 &6379439971053586497
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,9 +290,9 @@ GameObject:
   - component: {fileID: 4570058679523850664}
   - component: {fileID: 8732824402214922017}
   - component: {fileID: 2643755225928045721}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: PrivateHouse
-  m_TagString: Untagged
+  m_TagString: Background
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -306,8 +307,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 0.35}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 0.7, y: 0.7, z: -5}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4350922173999958029}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -357,7 +358,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_Sprite: {fileID: -890958389423434024, guid: 0a30e52a4ef659f4ab38d44ffbd507f0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -413,5 +414,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 11, y: 10}
+  m_Size: {x: 11, y: 9.94}
   m_EdgeRadius: 0

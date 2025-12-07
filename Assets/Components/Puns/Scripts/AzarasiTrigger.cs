@@ -39,6 +39,10 @@ public class AzarasiTrigger : MonoBehaviour
     [Tooltip("クリック数が100%のときのスプライト")]
     [SerializeField] private Sprite spriteAt100Percent;
     
+    [Header("Audio Settings")]
+    [Tooltip("クリック時のAudioSource（nullの場合は自動検索）")]
+    [SerializeField] private AudioSource audioSource;
+    
     private int currentClickCount = 0; // 現在のクリック回数
     private bool hasTriggered = false; // 既にダジャレが発生したか
     private bool isFadingOut = false; // フェードアウト中かどうか
@@ -78,6 +82,16 @@ public class AzarasiTrigger : MonoBehaviour
         if (spriteRenderer != null && defaultSprite != null)
         {
             spriteRenderer.sprite = defaultSprite;
+        }
+        
+        // AudioSourceを自動検索（インスペクタで設定されていない場合）
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = GetComponentInChildren<AudioSource>();
+            }
         }
     }
 
@@ -121,6 +135,15 @@ public class AzarasiTrigger : MonoBehaviour
         if (hit.collider != null && hit.collider == objectCollider)
         {
             currentClickCount++;
+            
+            // クリック数の割合を計算
+            float clickPercentage = (float)currentClickCount / requiredClickCount;
+            
+            // 100%未満の場合、AudioSourceを再生（複数同時再生可能）
+            if (clickPercentage < 1.0f && audioSource != null && audioSource.clip != null)
+            {
+                audioSource.PlayOneShot(audioSource.clip);
+            }
             
             // スプライトを更新
             UpdateSprite();

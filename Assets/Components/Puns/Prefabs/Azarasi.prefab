@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 399750128527153771}
   - component: {fileID: 655329497923528028}
   - component: {fileID: 3683987867804738728}
+  - component: {fileID: 8136921495169023339}
   m_Layer: 0
   m_Name: Azarasi
   m_TagString: Untagged
@@ -108,7 +109,11 @@ MonoBehaviour:
   punDisplayPrefab: {fileID: 3663420597882631773, guid: bfd9a05d1b993b74e8a2652046107928, type: 3}
   punsDatabase: {fileID: 11400000, guid: 6a1b63335980f404692fbbe560acb4ed, type: 2}
   spawnOffset: {x: 0, y: 0, z: 0}
-  displayDelay: 0.3
+  displayDelay: 0.5
+  scoreManager: {fileID: 0}
+  shakeStrength: 0.2
+  shakeDuration: 1
+  shakeVibrato: 10
 --- !u!114 &655329497923528028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,7 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76943dc80e3f4604584a6f628e9a4198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AzarasiTrigger
-  requiredClickCount: 6
+  requiredClickCount: 15
   punDisplayGenerator: {fileID: 399750128527153771}
   punId: Azarasi
   destroyInterval: 1
@@ -130,6 +135,7 @@ MonoBehaviour:
   defaultSprite: {fileID: 8081694365238600136, guid: f1f6a03b3cf50bd4ba0d1eac7c2e59a4, type: 3}
   spriteAt50Percent: {fileID: 4905795718935578576, guid: b50b2550287d0264bacc0923daedb0a4, type: 3}
   spriteAt100Percent: {fileID: 9059354967947619461, guid: c974479969bc88f46973d26bae079e36, type: 3}
+  audioSource: {fileID: 0}
 --- !u!70 &3683987867804738728
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -167,3 +173,100 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0.4}
   m_Size: {x: 16.86, y: 5.3}
   m_Direction: 1
+--- !u!82 &8136921495169023339
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7027957195924912867}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -7854087864773990548, guid: 3991df099916c224788b406c47675206, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 06f5e8eeec1848246916fd44cc7ccd5a, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.2
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

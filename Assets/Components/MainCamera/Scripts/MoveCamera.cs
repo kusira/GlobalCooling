@@ -106,8 +106,10 @@ public class MoveCamera : MonoBehaviour
         
         RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
         
-        // 何も当たらない場合（空の空間）のみカメラをドラッグ
-        if (hit.collider == null)
+        // 何も当たらない場合、またはBackGroundタグを持つオブジェクトに当たった場合にカメラをドラッグ
+        bool canDragCamera = hit.collider == null || (hit.collider != null && hit.collider.CompareTag("Background"));
+        
+        if (canDragCamera)
         {
             // DragAndDropManagerがオブジェクトをドラッグ中でないことを確認
             DragAndDropManager dragManager = FindFirstObjectByType<DragAndDropManager>();
@@ -127,7 +129,7 @@ public class MoveCamera : MonoBehaviour
             isDragging = true;
             previousMouseWorldPosition = mouseWorldPos;
         }
-        // オブジェクトに当たった場合はカメラドラッグを開始しない（何もしない）
+        // それ以外のオブジェクトに当たった場合はカメラドラッグを開始しない（何もしない）
     }
 
     /// <summary>

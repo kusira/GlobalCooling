@@ -139,6 +139,9 @@ public class NekoTrigger : MonoBehaviour
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId, gameObject);
         
+        // AudioSourceを再生（存在する場合のみ）
+        PunTriggerHelper.PlayAudioSource(gameObject);
+        
         // インターバル後にフェードアウトしてDestroy（共通処理を使用）
         PunTriggerHelper.StartDestroyAfterFadeOut(
             this,

@@ -248,6 +248,9 @@ public class MinkaTrigger : MonoBehaviour
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId, gameObject);
         
+        // AudioSourceを再生（存在する場合のみ）
+        PunTriggerHelper.PlayAudioSource(gameObject);
+        
         // 受け取るオブジェクトのリアクション（色変更とScale）
         if (reactionCoroutine != null)
         {

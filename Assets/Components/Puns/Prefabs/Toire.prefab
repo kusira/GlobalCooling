@@ -68,6 +68,7 @@ MonoBehaviour:
   punDisplayGenerator: {fileID: 9146057669478502661}
   dragAndDropManager: {fileID: 5325712458743218129}
   punId: Toire
+  receivedSprite: {fileID: -1020285944282886606, guid: a15b28b61dcb10a4db74bcbb7662f4ec, type: 3}
   reactionColor: {r: 0, g: 1, b: 0, a: 1}
   colorChangeDuration: 0.1
   scaleMultiplier: 1.1
@@ -89,9 +90,9 @@ GameObject:
   - component: {fileID: 7314514155607070920}
   - component: {fileID: 3289772317391725768}
   - component: {fileID: 6127134067703832904}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Toilet
-  m_TagString: Untagged
+  m_TagString: Background
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -105,9 +106,9 @@ Transform:
   m_GameObject: {fileID: 5492030665912013593}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -3.5, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.15}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4704027938036225869}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -158,7 +159,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: -8531834056277865494, guid: a71afe0618b86a94bb94dfba8415f1af, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -207,13 +208,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 8.99, y: 12.56}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 7.66, y: 11.89}
   m_EdgeRadius: 0
 --- !u!1 &6444448751451221295
 GameObject:
@@ -230,7 +231,7 @@ GameObject:
   - component: {fileID: 5325712458743218129}
   - component: {fileID: 2973293035925068568}
   m_Layer: 0
-  m_Name: Human
+  m_Name: ToiletHuman
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -245,9 +246,9 @@ Transform:
   m_GameObject: {fileID: 6444448751451221295}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3, y: -4, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4704027938036225869}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -297,13 +298,13 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.4764151, b: 0.4764151, a: 1}
+  m_SortingOrder: 10
+  m_Sprite: {fileID: -3516285878194796270, guid: 2626d4179290f974ca056436df15dcfc, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 5.16, y: 14.64}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -347,13 +348,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 5.16, y: 14.64}
+    newSize: {x: 5.16, y: 14.64}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 5.3, y: 14.79}
   m_EdgeRadius: 0
 --- !u!50 &5788946398286905533
 Rigidbody2D:
@@ -381,7 +382,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &5325712458743218129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -415,3 +416,4 @@ MonoBehaviour:
   maxLinearVelocity: 0
   maxAngularVelocity: 360
   enableCameraBoundary: 1
+  minBounceSpeed: 0.1

@@ -45,15 +45,21 @@ public class KabanTrigger : MonoBehaviour
     [Tooltip("オブジェクトをDestroyするかどうか")]
     [SerializeField] private bool shouldDestroy = true;
     
+    [Header("Sprite Settings")]
+    [Tooltip("重りを詰めた後のカバンのスプライト")]
+    [SerializeField] private Sprite bagSpriteWithWeight;
+    
     private bool isInWater = false; // Water内にいるかどうか
     private bool isTouchingJudgementFloor = false; // JudgementFloorに触れているかどうか
     private float judgementFloorTimer = 0f; // JudgementFloorに触れている時間
     private bool hasTriggered = false; // 既にダジャレが発生したか
     private bool isFadingOut = false; // フェードアウト中かどうか
+    private bool hasWeightAbsorbed = false; // 重りを詰めたかどうか
     private Rigidbody2D bagRigidbody; // BagのRigidbody2D
     private Collider2D bagCollider; // BagのCollider2D
     private Collider2D waterCollider; // WaterのCollider2D
     private Collider2D judgementFloorCollider; // JudgementFloorのCollider2D
+    private SpriteRenderer bagSpriteRenderer; // BagのSpriteRenderer
     
     private void Awake()
     {
@@ -62,6 +68,11 @@ public class KabanTrigger : MonoBehaviour
         {
             bagRigidbody = bagObject.GetComponent<Rigidbody2D>();
             bagCollider = bagObject.GetComponent<Collider2D>();
+            bagSpriteRenderer = bagObject.GetComponent<SpriteRenderer>();
+            if (bagSpriteRenderer == null)
+            {
+                bagSpriteRenderer = bagObject.GetComponentInChildren<SpriteRenderer>();
+            }
         }
         
         // WaterのCollider2Dを取得
@@ -104,8 +115,12 @@ public class KabanTrigger : MonoBehaviour
     
     private void Update()
     {
-        // JudgementFloorに触れていて、まだトリガーしていない場合
-        if (isTouchingJudgementFloor && !hasTriggered)
+        // カバンがドラッグ中かどうかをチェック
+        DragAndDropManager dragManager = FindFirstObjectByType<DragAndDropManager>();
+        bool isBagBeingDragged = dragManager != null && bagObject != null && dragManager.IsDragging(bagObject);
+        
+        // JudgementFloorに触れていて、まだトリガーしていない場合、かつドラッグ中でない場合
+        if (isTouchingJudgementFloor && !hasTriggered && !isBagBeingDragged)
         {
             judgementFloorTimer += Time.deltaTime;
             
@@ -133,6 +148,12 @@ public class KabanTrigger : MonoBehaviour
     /// </summary>
     private void CheckBagWeightCollision()
     {
+        // 既に重りを詰めた場合はチェックしない
+        if (hasWeightAbsorbed)
+        {
+            return;
+        }
+        
         if (bagCollider == null || weightObject == null)
         {
             return;
@@ -159,8 +180,16 @@ public class KabanTrigger : MonoBehaviour
     /// </summary>
     private void AbsorbWeight()
     {
-        if (weightObject == null || bagRigidbody == null)
+        if (weightObject == null || bagRigidbody == null || hasWeightAbsorbed)
         {
+            return;
+        }
+        
+        // 重りがドラッグ中でないことを確認（ドラッグ中に削除すると問題が起きる可能性がある）
+        DragAndDropManager dragManager = FindFirstObjectByType<DragAndDropManager>();
+        if (dragManager != null && dragManager.IsDragging(weightObject))
+        {
+            // ドラッグ中の場合は、次フレームに処理を延期
             return;
         }
         
@@ -176,9 +205,16 @@ public class KabanTrigger : MonoBehaviour
         // BagのMassを増やす
         bagRigidbody.mass += weightMass;
         
+        // スプライトを変更
+        if (bagSpriteRenderer != null && bagSpriteWithWeight != null)
+        {
+            bagSpriteRenderer.sprite = bagSpriteWithWeight;
+        }
+        
         // 重りを削除
         Destroy(weightObject);
         weightObject = null;
+        hasWeightAbsorbed = true;
     }
     
     /// <summary>
@@ -258,6 +294,9 @@ public class KabanTrigger : MonoBehaviour
         
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId, gameObject);
+        
+        // AudioSourceを再生（存在する場合のみ）
+        PunTriggerHelper.PlayAudioSource(gameObject);
         
         // インターバル後にフェードアウトしてDestroy（共通処理を使用）
         PunTriggerHelper.StartDestroyAfterFadeOut(

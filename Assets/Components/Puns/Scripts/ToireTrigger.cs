@@ -254,6 +254,9 @@ public class ToireTrigger : MonoBehaviour
         // PunDisplayGeneratorにダジャレ成立を通知
         punDisplayGenerator.GeneratePun(punId, gameObject);
         
+        // AudioSourceを再生（存在する場合のみ）
+        PunTriggerHelper.PlayAudioSource(gameObject);
+        
         // 受け取った後のスプライトに変更
         if (receivedSprite != null && receiveSpriteRenderers != null)
         {
