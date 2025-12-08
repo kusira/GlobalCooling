@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 2626d4179290f974ca056436df15dcfc
+guid: 9fa6edb092fa81e4295ead78c7fe9f7e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -9001595496705061575
-    second: ToiletHuman_0
-  - first:
-      213: -3516285878194796270
-    second: ToiletHuman_1
+      213: -5601767544888516966
+    second: HomeButton_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ToiletHuman_0
+      name: HomeButton_0
       rect:
         serializedVersion: 2
-        x: 630
-        y: 63
-        width: 721
-        height: 1562
+        x: 543
+        y: 538
+        width: 943
+        height: 966
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,30 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93d83279698e31380800000000000000
-      internalID: -9001595496705061575
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ToiletHuman_1
-      rect:
-        serializedVersion: 2
-        x: 1382
-        y: 1224
-        width: 6
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2190a75bf94a33fc0800000000000000
-      internalID: -3516285878194796270
+      spriteID: a9e9b9ce8168242b0800000000000000
+      internalID: -5601767544888516966
       vertices: []
       indices: 
       edges: []
@@ -173,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ToiletHuman_0: -9001595496705061575
-      ToiletHuman_1: -3516285878194796270
+      HomeButton_0: -5601767544888516966
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

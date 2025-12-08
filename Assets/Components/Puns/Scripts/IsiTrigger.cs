@@ -8,8 +8,8 @@ using System.Collections;
 public class IsiTrigger : MonoBehaviour
 {
     [Header("Trigger Settings")]
-    [Tooltip("ダジャレ成立に必要なY軸の最小値（この値以上でトリガー）")]
-    [SerializeField] private float minYPosition = 3f;
+    [Tooltip("ダジャレ成立に必要なドロップから着地までの最小時間（秒）")]
+    [SerializeField] private float minDropToLandTime = 0.3f;
     
     [Tooltip("ダジャレ発生までのインターバル（秒）")]
     [SerializeField] private float triggerInterval = 0.5f;
@@ -37,6 +37,8 @@ public class IsiTrigger : MonoBehaviour
     
     private Rigidbody2D rb;
     private bool isFadingOut = false; // フェードアウト中かどうか
+    private float dropTime = -1f; // ドロップ時刻（-1は未ドロップ状態）
+    private bool isWaitingForLanding = false; // 着地待ち中かどうか
 
     private void Awake()
     {
@@ -52,20 +54,68 @@ public class IsiTrigger : MonoBehaviour
     /// ドラッグが終了したときに呼び出される（DragAndDropManagerから呼び出される想定）
     /// </summary>
     /// <param name="releaseVelocity">離したときの速度</param>
-    public void OnDragReleased(Vector3 releaseVelocity)
+    /// <param name="dropTime">マウスを離した時刻（Time.time）</param>
+    public void OnDragReleased(Vector3 releaseVelocity, float dropTime)
     {
-        // 石オブジェクトのY座標をチェック
-        if (stoneObject != null)
+        // ドロップ時刻を記録（DragAndDropManagerから渡された時刻を使用）
+        this.dropTime = dropTime;
+        isWaitingForLanding = true;
+    }
+
+    /// <summary>
+    /// 衝突検出（着地検出用）
+    /// </summary>
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // 着地待ち中で、石オブジェクトが衝突した場合
+        if (isWaitingForLanding && stoneObject != null)
         {
-            float yPosition = stoneObject.transform.position.y;
-            
-            // Y軸が閾値以上かチェック
-            if (yPosition >= minYPosition)
+            // このスクリプトがアタッチされているオブジェクトが衝突した場合
+            if (collision.gameObject == stoneObject || collision.otherCollider.gameObject == stoneObject)
             {
-                // インターバル後にダジャレを成立させる
-                StartCoroutine(TriggerPunDelayed());
+                CheckLandingTime();
             }
         }
+    }
+
+    /// <summary>
+    /// トリガー検出（着地検出用、トリガーコライダーがある場合）
+    /// </summary>
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // 着地待ち中で、石オブジェクトがトリガーに入った場合
+        if (isWaitingForLanding && stoneObject != null)
+        {
+            if (other.gameObject == stoneObject)
+            {
+                CheckLandingTime();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 着地時刻をチェックしてダジャレを成立させる
+    /// </summary>
+    private void CheckLandingTime()
+    {
+        if (dropTime < 0f)
+        {
+            return; // ドロップ時刻が記録されていない
+        }
+
+        // ドロップから着地までの時間を計算
+        float dropToLandTime = Time.time - dropTime;
+
+        // 一定時間以上経過しているかチェック
+        if (dropToLandTime >= minDropToLandTime)
+        {
+            // インターバル後にダジャレを成立させる
+            StartCoroutine(TriggerPunDelayed());
+        }
+
+        // 着地待ち状態をリセット
+        isWaitingForLanding = false;
+        dropTime = -1f;
     }
 
     /// <summary>

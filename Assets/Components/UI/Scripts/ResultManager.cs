@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.Audio;
 using DG.Tweening;
 
 /// <summary>
@@ -13,6 +15,10 @@ public class ResultManager : MonoBehaviour
     
     [Tooltip("リザルトパネル")]
     [SerializeField] private GameObject resultPanel;
+
+    [Header("Buttons")]
+    [Tooltip("ホームに戻る（シーン再読み込み）ボタン")]
+    [SerializeField] private Button homeButton;
     
     [Header("Animation Settings")]
     [Tooltip("フェードイン/アウトの時間（秒）")]
@@ -20,6 +26,28 @@ public class ResultManager : MonoBehaviour
     
     [Tooltip("ResultPanelの下からの移動距離")]
     [SerializeField] private float panelMoveDistance = 100f;
+
+    [Header("Audio")]
+    [Tooltip("クリア時に鳴らすAudioSource（自身に付けたものを想定）")]
+    [SerializeField] private AudioSource audioSource;
+
+    [Tooltip("BGMの音量制御用AudioMixer")]
+    [SerializeField] private AudioMixer audioMixer;
+
+    [Tooltip("BGMのExposed Parameter名（AudioMixerで設定した名前）")]
+    [SerializeField] private string bgmParamName = "BGM";
+
+    [Tooltip("BGMの音量を下げる目標値（0-1の範囲）")]
+    [SerializeField, Range(0f, 1f)] private float bgmFadedVolume = 0.2f;
+
+    [Tooltip("BGMの音量を下げる時間（秒）")]
+    [SerializeField] private float bgmVolumeFadeDownDuration = 0.3f;
+
+    [Tooltip("BGMの音量を小さくしたまま保持する時間（秒）")]
+    [SerializeField] private float bgmVolumeHoldDuration = 2f;
+
+    [Tooltip("BGMの音量を元に戻す時間（秒）")]
+    [SerializeField] private float bgmVolumeFadeUpDuration = 0.3f;
     
     private bool isShowing = false; // リザルト表示中かどうか
     private CanvasGroup blackGroundCanvasGroup; // BlackGroundのCanvasGroup
@@ -29,10 +57,22 @@ public class ResultManager : MonoBehaviour
     private Tween blackGroundFadeTween; // BlackGroundのフェードTween
     private Tween resultPanelFadeTween; // ResultPanelのフェードTween
     private Tween resultPanelMoveTween; // ResultPanelの移動Tween
+    private Sequence bgmVolumeSequence; // BGMの音量制御シーケンス
+    private float originalBgmVolume = 1f; // 元のBGM音量（0-1の範囲）
     private MoveCamera moveCamera; // MainCameraのMoveCameraコンポーネント
     
     private void Awake()
     {
+        // 元のBGM音量を取得
+        if (audioMixer != null && !string.IsNullOrEmpty(bgmParamName))
+        {
+            if (audioMixer.GetFloat(bgmParamName, out float currentDb))
+            {
+                // デシベル値を0-1の範囲に変換
+                originalBgmVolume = currentDb <= -80f ? 0f : Mathf.Pow(10f, currentDb / 20f);
+            }
+        }
+
         // BlackGroundとResultPanelを非アクティブにする
         if (blackGround != null)
         {
@@ -92,6 +132,12 @@ public class ResultManager : MonoBehaviour
         {
             moveCamera = mainCamera.GetComponent<MoveCamera>();
         }
+
+        if (homeButton != null)
+        {
+            homeButton.onClick.RemoveListener(ReloadCurrentScene);
+            homeButton.onClick.AddListener(ReloadCurrentScene);
+        }
     }
     
     private void OnDestroy()
@@ -111,6 +157,11 @@ public class ResultManager : MonoBehaviour
         {
             resultPanelMoveTween.Kill();
         }
+
+        if (bgmVolumeSequence != null && bgmVolumeSequence.IsActive())
+        {
+            bgmVolumeSequence.Kill();
+        }
     }
     
     /// <summary>
@@ -128,6 +179,69 @@ public class ResultManager : MonoBehaviour
         // ゲーム時間を止める
         Time.timeScale = 0f;
         
+        // クリア時のサウンド再生とBGM音量フェードダウン（同時実行）
+        if (audioSource != null)
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.Play();
+            }
+        }
+
+        // SEが鳴ったタイミングと同時にBGMの音量を小さくし、数秒後に元に戻す
+        if (audioMixer != null && !string.IsNullOrEmpty(bgmParamName))
+        {
+            // 既存のシーケンスを停止
+            if (bgmVolumeSequence != null && bgmVolumeSequence.IsActive())
+            {
+                bgmVolumeSequence.Kill();
+            }
+
+            // 現在のBGM音量を取得
+            if (audioMixer.GetFloat(bgmParamName, out float currentDb))
+            {
+                float currentVolume = currentDb <= -80f ? 0f : Mathf.Pow(10f, currentDb / 20f);
+                // 現在の音量にfadedVolumeを乗算
+                float fadedVolume = currentVolume * bgmFadedVolume;
+                // 元の音量を保存（フェードアップ時に使用）
+                originalBgmVolume = currentVolume;
+
+                // シーケンスを作成：フェードダウン → 保持 → フェードアップ
+                bgmVolumeSequence = DOTween.Sequence()
+                    .SetUpdate(true) // 時間停止の影響を受けないように
+                    .SetTarget(audioMixer);
+
+                // フェードダウン：音量を小さくする
+                bgmVolumeSequence.Append(DOTween.To(
+                    () => currentVolume,
+                    v =>
+                    {
+                        currentVolume = v;
+                        float db = v <= 0 ? -80f : Mathf.Log10(v) * 20f;
+                        audioMixer.SetFloat(bgmParamName, db);
+                    },
+                    fadedVolume,
+                    bgmVolumeFadeDownDuration
+                ).SetEase(Ease.Linear));
+
+                // 保持：小さくしたまま数秒間維持
+                bgmVolumeSequence.AppendInterval(bgmVolumeHoldDuration);
+
+                // フェードアップ：元の音量に戻す（現在の音量から元の音量へ）
+                bgmVolumeSequence.Append(DOTween.To(
+                    () => currentVolume,
+                    v =>
+                    {
+                        currentVolume = v;
+                        float db = v <= 0 ? -80f : Mathf.Log10(v) * 20f;
+                        audioMixer.SetFloat(bgmParamName, db);
+                    },
+                    originalBgmVolume,
+                    bgmVolumeFadeUpDuration
+                ).SetEase(Ease.Linear));
+            }
+        }
+
         // MainCameraのMoveCameraを無効化
         if (moveCamera != null)
         {
@@ -183,6 +297,17 @@ public class ResultManager : MonoBehaviour
                 .SetEase(Ease.OutCubic)
                 .SetTarget(resultPanelRectTransform);
         }
+    }
+
+    /// <summary>
+    /// 現在のシーンを再読み込み（ホームボタン用）
+    /// </summary>
+    private void ReloadCurrentScene()
+    {
+        // 一時停止を解除してからロード
+        Time.timeScale = 1f;
+        Scene current = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(current.name);
     }
 }
 

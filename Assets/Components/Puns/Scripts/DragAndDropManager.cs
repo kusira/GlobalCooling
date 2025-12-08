@@ -171,10 +171,10 @@ public class DragAndDropManager : MonoBehaviour
         // MovePositionを使用して物理演算を維持しながら位置を更新
         draggedObject.MovePosition(targetPosition);
         
-        // オブジェクトがカメラの視界外に出そうな場合、カメラを追従させる
+        // オブジェクトがカメラの視界外に出そうな場合、カメラを追従させる（X座標とY座標の両方）
         if (moveCamera != null)
         {
-            moveCamera.FollowObject(targetPosition.x);
+            moveCamera.FollowObject(targetPosition.x, targetPosition.y);
         }
         
         // 次のフレーム用にマウス位置を記録
@@ -190,6 +190,9 @@ public class DragAndDropManager : MonoBehaviour
         {
             return;
         }
+
+        // マウスを離した時刻を記録（最初に記録することで正確な時刻を取得）
+        float dropTime = Time.time;
 
         // マウス位置をワールド座標に変換
         Vector3 mouseWorldPos = GetMouseWorldPosition();
@@ -228,10 +231,10 @@ public class DragAndDropManager : MonoBehaviour
             currentFutonTrigger.OnDragReleased(mouseVelocity);
         }
         
-        // IsiTriggerにドラッグ終了を通知
+        // IsiTriggerにドラッグ終了を通知（ドロップ時刻も渡す）
         if (currentIsiTrigger != null)
         {
-            currentIsiTrigger.OnDragReleased(mouseVelocity);
+            currentIsiTrigger.OnDragReleased(mouseVelocity, dropTime);
         }
         
         draggedObject = null;

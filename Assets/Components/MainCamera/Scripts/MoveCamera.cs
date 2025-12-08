@@ -33,6 +33,19 @@ public class MoveCamera : MonoBehaviour
     [Tooltip("画面端スクロールを有効にするか")]
     [SerializeField] private bool enableEdgeScroll = true;
     
+    [Header("Zoom Settings")]
+    [Tooltip("カメラの最小サイズ（ズームイン時のサイズ）")]
+    [SerializeField] private float minOrthographicSize = 5f;
+    
+    [Tooltip("カメラの最大サイズ（ズームアウト時のサイズ）")]
+    [SerializeField] private float maxOrthographicSize = 15f;
+    
+    [Tooltip("ズーム速度（マウスホイール1回あたりのサイズ変化量）")]
+    [SerializeField] private float zoomSpeed = 1f;
+    
+    [Tooltip("ズームを有効にするか")]
+    [SerializeField] private bool enableZoom = true;
+    
     [Header("Map Settings")]
     [Tooltip("マップのGameObject")]
     [SerializeField] private GameObject map;
@@ -40,9 +53,13 @@ public class MoveCamera : MonoBehaviour
     [Tooltip("マップ上の位置を示すアイコン（Sign）")]
     [SerializeField] private GameObject sign;
     
+    [Tooltip("マップの基準サイズ（カメラサイズが基準サイズの時のマップサイズ）")]
+    [SerializeField] private float mapBaseSize = 5f;
+    
     private Camera mainCamera;
     private Vector3 previousMouseWorldPosition; // 前フレームのマウスのワールド座標
     private bool isDragging = false; // ドラッグ中かどうか
+    private float initialOrthographicSize; // 初期のorthographicSize
 
     private void Awake()
     {
@@ -56,13 +73,55 @@ public class MoveCamera : MonoBehaviour
         {
             Debug.LogError("MoveCamera: Cameraが見つかりません。");
         }
+        else
+        {
+            // 初期のorthographicSizeを保存
+            initialOrthographicSize = mainCamera.orthographicSize;
+        }
     }
 
     private void Update()
     {
         HandleInput();
+        HandleZoom();
         HandleEdgeScroll();
         UpdateSignPosition();
+        UpdateMapScale();
+    }
+
+    /// <summary>
+    /// ズーム処理
+    /// </summary>
+    private void HandleZoom()
+    {
+        if (!enableZoom || mainCamera == null || Mouse.current == null)
+        {
+            return;
+        }
+
+        // UI要素上にマウスがある場合はズームしない
+        if (UnityEngine.EventSystems.EventSystem.current != null && 
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
+        // マウスホイールのスクロール量を取得
+        Vector2 scrollDelta = Mouse.current.scroll.ReadValue();
+        float scrollValue = scrollDelta.y;
+
+        if (Mathf.Abs(scrollValue) > 0.01f)
+        {
+            // 現在のサイズを取得
+            float currentSize = mainCamera.orthographicSize;
+
+            // ズーム量を計算
+            float zoomDelta = -scrollValue * zoomSpeed * Time.deltaTime;
+            float newSize = Mathf.Clamp(currentSize + zoomDelta, minOrthographicSize, maxOrthographicSize);
+
+            // カメラサイズを更新
+            mainCamera.orthographicSize = newSize;
+        }
     }
 
     /// <summary>
@@ -370,6 +429,58 @@ public class MoveCamera : MonoBehaviour
             SetCameraPosition(newCameraX);
         }
     }
+
+    /// <summary>
+    /// オブジェクトがカメラの視界内に収まるようにカメラ位置を調整（X座標とY座標の両方）
+    /// </summary>
+    /// <param name="objectX">オブジェクトのX座標</param>
+    /// <param name="objectY">オブジェクトのY座標</param>
+    public void FollowObject(float objectX, float objectY)
+    {
+        if (mainCamera == null)
+        {
+            return;
+        }
+        
+        float orthographicSize = mainCamera.orthographicSize;
+        float aspect = mainCamera.aspect;
+        float cameraWidth = orthographicSize * aspect * 2f;
+        float cameraHeight = orthographicSize * 2f;
+        
+        Vector3 cameraPos = transform.position;
+        float leftBound = cameraPos.x - cameraWidth * 0.5f;
+        float rightBound = cameraPos.x + cameraWidth * 0.5f;
+        float bottomBound = cameraPos.y - cameraHeight * 0.5f;
+        float topBound = cameraPos.y + cameraHeight * 0.5f;
+        
+        float newCameraX = cameraPos.x;
+        float newCameraY = cameraPos.y;
+        
+        // オブジェクトが左端より外に出そうな場合
+        if (objectX < leftBound)
+        {
+            newCameraX = objectX + cameraWidth * 0.5f;
+        }
+        // オブジェクトが右端より外に出そうな場合
+        else if (objectX > rightBound)
+        {
+            newCameraX = objectX - cameraWidth * 0.5f;
+        }
+        
+        // オブジェクトが下端より外に出そうな場合
+        if (objectY < bottomBound)
+        {
+            newCameraY = objectY + cameraHeight * 0.5f;
+        }
+        // オブジェクトが上端より外に出そうな場合
+        else if (objectY > topBound)
+        {
+            newCameraY = objectY - cameraHeight * 0.5f;
+        }
+        
+        // カメラ位置を更新（範囲内に制限）
+        SetCameraPosition(newCameraX, newCameraY);
+    }
     
     /// <summary>
     /// Signの位置を更新（カメラ位置に対応するMap上の位置）
@@ -446,6 +557,45 @@ public class MoveCamera : MonoBehaviour
                     sign.transform.position.z
                 );
             }
+        }
+    }
+
+    /// <summary>
+    /// マップのスケールを更新（カメラのズームに応じて）
+    /// </summary>
+    private void UpdateMapScale()
+    {
+        if (map == null || mainCamera == null)
+        {
+            return;
+        }
+
+        // カメラサイズに応じてマップのスケールを調整
+        float currentSize = mainCamera.orthographicSize;
+        float scaleRatio = currentSize / mapBaseSize;
+
+        // マップのスケールを更新
+        RectTransform mapRectTransform = map.GetComponent<RectTransform>();
+        if (mapRectTransform != null)
+        {
+            // マップのサイズを調整（基準サイズに対する比率で調整）
+            // 初期サイズを基準として、カメラサイズの変化に比例してマップサイズを変更
+            float baseScale = initialOrthographicSize / mapBaseSize;
+            float newScale = scaleRatio / baseScale;
+            
+            // 元のサイズを保持するために、初期サイズを基準に計算
+            // 実際には、mapBaseSizeが基準となるサイズなので、それに対する比率で調整
+            Vector3 currentScale = map.transform.localScale;
+            if (currentScale.x != newScale || currentScale.y != newScale)
+            {
+                map.transform.localScale = new Vector3(newScale, newScale, 1f);
+            }
+        }
+        else
+        {
+            // RectTransformがない場合、通常のTransformでスケールを調整
+            float newScale = scaleRatio;
+            map.transform.localScale = new Vector3(newScale, newScale, 1f);
         }
     }
 }

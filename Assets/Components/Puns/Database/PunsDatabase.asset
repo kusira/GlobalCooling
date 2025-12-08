@@ -17,7 +17,7 @@ MonoBehaviour:
     text: "<color=#FF0000>\u3075\u3068\u3093</color>\u304C\\n<color=#FF0000>\u5439\u3063\u98DB\u3093</color>\u3060"
     fontSize: 30
   - id: Arumikan
-    text: "<color=#FF0000>\u30A2\u30EB\u30DF\u7F36</color>\\n\u306E\u4E0A\u306B\u3042\u308B<color=#FF0000>\u307F\u304B\u3093</color>"
+    text: "<color=#FF0000>\u30A2\u30EB\u30DF\u7F36</color>\\n\u306E\u4E0A\u306B<color=#FF0000>\u3042\u308B\u307F\u304B\u3093</color>"
     fontSize: 24
   - id: Isi
     text: "<color=#FF0000>\u77F3</color>\u304C<color=#FF0000>\u30B9\u30C8\u30FC\u30F3</color>\\n\u3068\u843D\u3061\u308B"
