@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using TMPro;
 using DG.Tweening;
 
@@ -17,6 +18,18 @@ public class ScoreManager : MonoBehaviour
     
     [Tooltip("スコア更新時の拡縮倍率")]
     [SerializeField] private float scaleMultiplier = 1.2f;
+    
+    [Header("Result Settings")]
+    [Tooltip("リザルト画面を表示するスコア")]
+    [SerializeField] private int resultTriggerScore = 10;
+    
+    [Tooltip("リザルト画面を表示するまでの遅延時間（秒）")]
+    [SerializeField] private float resultDelayTime = 3f;
+    
+    [Tooltip("ResultManagerへの参照")]
+    [SerializeField] private ResultManager resultManager;
+    
+    private bool hasTriggeredResult = false; // リザルト表示をトリガーしたかどうか
     
     /// <summary>
     /// 現在見つけたダジャレ数
@@ -37,6 +50,13 @@ public class ScoreManager : MonoBehaviour
         CurrentScore++;
         UpdateScoreText();
         PlayScaleAnimation();
+        
+        // リザルト表示条件をチェック（一度だけ実行）
+        if (CurrentScore >= resultTriggerScore && resultManager != null && !hasTriggeredResult)
+        {
+            hasTriggeredResult = true;
+            StartCoroutine(ShowResultDelayed());
+        }
     }
     
     /// <summary>
@@ -78,6 +98,19 @@ public class ScoreManager : MonoBehaviour
                 .SetEase(Ease.InQuad)
                 .SetTarget(currentScoreText.transform)
         );
+    }
+    
+    /// <summary>
+    /// 遅延後にリザルト画面を表示
+    /// </summary>
+    private IEnumerator ShowResultDelayed()
+    {
+        yield return new WaitForSeconds(resultDelayTime);
+        
+        if (resultManager != null)
+        {
+            resultManager.ShowResult();
+        }
     }
 }
 

@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 /// <summary>
-/// 空の空間をドラッグすることでカメラのX座標を移動させるスクリプト
+/// 空の空間をドラッグすることでカメラのX座標とY座標を移動させるスクリプト
 /// </summary>
 public class MoveCamera : MonoBehaviour
 {
@@ -14,17 +14,35 @@ public class MoveCamera : MonoBehaviour
     [Tooltip("カメラのX座標の最大値")]
     [SerializeField] private float maxX = 10f;
     
+    [Tooltip("カメラのY座標の最小値")]
+    [SerializeField] private float minY = 0f;
+    
+    [Tooltip("カメラのY座標の最大値")]
+    [SerializeField] private float maxY = 10f;
+    
     [Tooltip("ドラッグ感度（マウスの移動量に対するカメラの移動量）")]
     [SerializeField] private float dragSensitivity = 1f;
     
-    [Header("UI Settings")]
-    [Tooltip("カメラのX位置を表示するScrollbar")]
-    [SerializeField] private Scrollbar positionScrollbar;
+    [Header("Edge Scroll Settings")]
+    [Tooltip("画面端の検出エリアの幅（ピクセル）")]
+    [SerializeField] private float edgeDetectionWidth = 50f;
+    
+    [Tooltip("画面端での自動スクロール速度")]
+    [SerializeField] private float edgeScrollSpeed = 5f;
+    
+    [Tooltip("画面端スクロールを有効にするか")]
+    [SerializeField] private bool enableEdgeScroll = true;
+    
+    [Header("Map Settings")]
+    [Tooltip("マップのGameObject")]
+    [SerializeField] private GameObject map;
+    
+    [Tooltip("マップ上の位置を示すアイコン（Sign）")]
+    [SerializeField] private GameObject sign;
     
     private Camera mainCamera;
     private Vector3 previousMouseWorldPosition; // 前フレームのマウスのワールド座標
     private bool isDragging = false; // ドラッグ中かどうか
-    private CanvasGroup scrollbarCanvasGroup; // ScrollbarのCanvasGroup（opacity制御用）
 
     private void Awake()
     {
@@ -38,34 +56,13 @@ public class MoveCamera : MonoBehaviour
         {
             Debug.LogError("MoveCamera: Cameraが見つかりません。");
         }
-        
-        // ScrollbarのCanvasGroupを取得（親またはScrollbar自体）
-        if (positionScrollbar != null)
-        {
-            scrollbarCanvasGroup = positionScrollbar.GetComponent<CanvasGroup>();
-            if (scrollbarCanvasGroup == null)
-            {
-                // Scrollbar自体にCanvasGroupがない場合は親を探す
-                scrollbarCanvasGroup = positionScrollbar.GetComponentInParent<CanvasGroup>();
-            }
-            
-            // それでも見つからない場合はScrollbarのGameObjectに追加
-            if (scrollbarCanvasGroup == null)
-            {
-                scrollbarCanvasGroup = positionScrollbar.gameObject.AddComponent<CanvasGroup>();
-            }
-            
-            // 初期状態は常に表示
-            scrollbarCanvasGroup.alpha = 1f;
-            scrollbarCanvasGroup.interactable = false;
-            scrollbarCanvasGroup.blocksRaycasts = false;
-        }
     }
 
     private void Update()
     {
         HandleInput();
-        UpdateScrollbar();
+        HandleEdgeScroll();
+        UpdateSignPosition();
     }
 
     /// <summary>
@@ -168,15 +165,18 @@ public class MoveCamera : MonoBehaviour
         
         // マウスの移動量を計算
         float deltaX = (mouseWorldPos.x - previousMouseWorldPosition.x) * dragSensitivity;
+        float deltaY = (mouseWorldPos.y - previousMouseWorldPosition.y) * dragSensitivity;
         
-        // カメラの新しいX座標を計算
+        // カメラの新しい座標を計算
         float newX = transform.position.x + deltaX;
+        float newY = transform.position.y + deltaY;
         
         // minとmaxで範囲を制限
         newX = Mathf.Clamp(newX, minX, maxX);
+        newY = Mathf.Clamp(newY, minY, maxY);
         
-        // カメラの位置を更新（X座標のみ）
-        transform.position = new Vector3(newX, transform.position.y, transform.position.z);
+        // カメラの位置を更新（X座標とY座標）
+        transform.position = new Vector3(newX, newY, transform.position.z);
         
         // 次のフレーム用にマウス位置を記録
         previousMouseWorldPosition = mouseWorldPos;
@@ -188,6 +188,88 @@ public class MoveCamera : MonoBehaviour
     private void EndDrag()
     {
         isDragging = false;
+    }
+    
+    /// <summary>
+    /// 画面端での自動スクロール処理（クリック中のみ）
+    /// </summary>
+    private void HandleEdgeScroll()
+    {
+        // 画面端スクロールが無効、またはマウスボタンが押されていない場合は何もしない
+        if (!enableEdgeScroll || mainCamera == null || Mouse.current == null)
+        {
+            return;
+        }
+        
+        // マウスボタンが押されているかチェック（クリック中のみ動作）
+        if (!Mouse.current.leftButton.isPressed)
+        {
+            return;
+        }
+        
+        // UI要素上にマウスがある場合は何もしない
+        if (UnityEngine.EventSystems.EventSystem.current != null && 
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+        
+        // DragAndDropManagerがオブジェクトをドラッグ中かどうかを確認
+        DragAndDropManager dragManager = FindFirstObjectByType<DragAndDropManager>();
+        if (dragManager != null)
+        {
+            Vector3 mouseWorldPos = GetMouseWorldPosition();
+            Collider2D collider = Physics2D.OverlapPoint(mouseWorldPos);
+            if (collider != null && collider.attachedRigidbody != null && 
+                collider.attachedRigidbody.bodyType == RigidbodyType2D.Dynamic)
+            {
+                // オブジェクトをドラッグ中の場合はカメラを移動しない
+                return;
+            }
+        }
+        
+        // マウス位置を取得
+        Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
+        float screenWidth = Screen.width;
+        float screenHeight = Screen.height;
+        
+        // 移動量を初期化
+        float moveX = 0f;
+        float moveY = 0f;
+        
+        // 左端の検出
+        if (mouseScreenPos.x < edgeDetectionWidth)
+        {
+            float normalizedDistance = mouseScreenPos.x / edgeDetectionWidth;
+            moveX = -edgeScrollSpeed * (1f - normalizedDistance) * Time.deltaTime;
+        }
+        // 右端の検出
+        else if (mouseScreenPos.x > screenWidth - edgeDetectionWidth)
+        {
+            float normalizedDistance = (screenWidth - mouseScreenPos.x) / edgeDetectionWidth;
+            moveX = edgeScrollSpeed * (1f - normalizedDistance) * Time.deltaTime;
+        }
+        
+        // 下端の検出
+        if (mouseScreenPos.y < edgeDetectionWidth)
+        {
+            float normalizedDistance = mouseScreenPos.y / edgeDetectionWidth;
+            moveY = -edgeScrollSpeed * (1f - normalizedDistance) * Time.deltaTime;
+        }
+        // 上端の検出
+        else if (mouseScreenPos.y > screenHeight - edgeDetectionWidth)
+        {
+            float normalizedDistance = (screenHeight - mouseScreenPos.y) / edgeDetectionWidth;
+            moveY = edgeScrollSpeed * (1f - normalizedDistance) * Time.deltaTime;
+        }
+        
+        // カメラを移動
+        if (moveX != 0f || moveY != 0f)
+        {
+            float newX = Mathf.Clamp(transform.position.x + moveX, minX, maxX);
+            float newY = Mathf.Clamp(transform.position.y + moveY, minY, maxY);
+            transform.position = new Vector3(newX, newY, transform.position.z);
+        }
     }
 
     /// <summary>
@@ -210,29 +292,6 @@ public class MoveCamera : MonoBehaviour
         mouseWorldPos.z = 0f; // 2DなのでZ座標は0
         
         return mouseWorldPos;
-    }
-    
-    /// <summary>
-    /// Scrollbarを更新（カメラ位置の表示）
-    /// </summary>
-    private void UpdateScrollbar()
-    {
-        if (positionScrollbar == null || scrollbarCanvasGroup == null)
-        {
-            return;
-        }
-        
-        // カメラの現在のX座標
-        float currentCameraX = transform.position.x;
-        
-        // ScrollbarのValueを更新（0-1の範囲に正規化）
-        float normalizedValue = Mathf.InverseLerp(minX, maxX, currentCameraX);
-        positionScrollbar.value = normalizedValue;
-        
-        // opacityは固定（常に1.0）
-        scrollbarCanvasGroup.alpha = 1f;
-        scrollbarCanvasGroup.interactable = false;
-        scrollbarCanvasGroup.blocksRaycasts = false;
     }
     
     /// <summary>
@@ -268,6 +327,18 @@ public class MoveCamera : MonoBehaviour
     }
     
     /// <summary>
+    /// カメラ位置を設定（範囲内に制限）
+    /// </summary>
+    /// <param name="targetX">目標X座標</param>
+    /// <param name="targetY">目標Y座標</param>
+    public void SetCameraPosition(float targetX, float targetY)
+    {
+        float clampedX = Mathf.Clamp(targetX, minX, maxX);
+        float clampedY = Mathf.Clamp(targetY, minY, maxY);
+        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
+    }
+    
+    /// <summary>
     /// オブジェクトがカメラの視界内に収まるようにカメラ位置を調整
     /// </summary>
     /// <param name="objectX">オブジェクトのX座標</param>
@@ -297,6 +368,84 @@ public class MoveCamera : MonoBehaviour
         {
             float newCameraX = objectX - cameraWidth * 0.5f;
             SetCameraPosition(newCameraX);
+        }
+    }
+    
+    /// <summary>
+    /// Signの位置を更新（カメラ位置に対応するMap上の位置）
+    /// </summary>
+    private void UpdateSignPosition()
+    {
+        if (map == null || sign == null)
+        {
+            return;
+        }
+        
+        // MapのRectTransformを取得
+        RectTransform mapRectTransform = map.GetComponent<RectTransform>();
+        if (mapRectTransform == null)
+        {
+            return;
+        }
+        
+        // Mapのサイズを取得
+        Rect mapRect = mapRectTransform.rect;
+        float mapWidth = mapRect.width;
+        float mapHeight = mapRect.height;
+        
+        // カメラの現在位置
+        float cameraX = transform.position.x;
+        float cameraY = transform.position.y;
+        
+        // カメラの移動範囲
+        float cameraRangeX = maxX - minX;
+        float cameraRangeY = maxY - minY;
+        
+        // カメラ位置を0-1の範囲に正規化
+        float normalizedX = cameraRangeX > 0f ? Mathf.InverseLerp(minX, maxX, cameraX) : 0.5f;
+        float normalizedY = cameraRangeY > 0f ? Mathf.InverseLerp(minY, maxY, cameraY) : 0.5f;
+        
+        // Map上の位置を計算（Mapの中心を原点として）
+        float signX = (normalizedX - 0.5f) * mapWidth;
+        float signY = (normalizedY - 0.5f) * mapHeight;
+        
+        // Signの位置を更新（Mapのローカル座標系で）
+        RectTransform signRectTransform = sign.GetComponent<RectTransform>();
+        if (signRectTransform != null)
+        {
+            // SignをMapの子要素として配置する場合
+            if (sign.transform.parent == map.transform)
+            {
+                signRectTransform.anchoredPosition = new Vector2(signX, signY);
+            }
+            else
+            {
+                // SignがMapの子要素でない場合、ワールド座標で計算
+                Vector3 mapWorldPos = mapRectTransform.position;
+                Vector3 signWorldPos = new Vector3(
+                    mapWorldPos.x + signX,
+                    mapWorldPos.y + signY,
+                    signRectTransform.position.z
+                );
+                signRectTransform.position = signWorldPos;
+            }
+        }
+        else
+        {
+            // RectTransformがない場合（通常のTransform）
+            if (sign.transform.parent == map.transform)
+            {
+                sign.transform.localPosition = new Vector3(signX, signY, sign.transform.localPosition.z);
+            }
+            else
+            {
+                Vector3 mapWorldPos = map.transform.position;
+                sign.transform.position = new Vector3(
+                    mapWorldPos.x + signX,
+                    mapWorldPos.y + signY,
+                    sign.transform.position.z
+                );
+            }
         }
     }
 }
